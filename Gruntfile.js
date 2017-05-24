@@ -8,11 +8,11 @@ module.exports = function(grunt) {
       },
       local: {
         src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js'],
-        dest: 'dist/unminifiedgame.js',
+        dest: 'dist/app.js',
       },
       build: {
         src: ['src/js/vendor/min/phaser.min.js', 'src/js/*.js'],
-        dest: 'dist/minifiedgame.js',
+        dest: 'dist/app.js',
       }
     },
     uglify: {
@@ -21,7 +21,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'dist/minifiedgame.js': ['<%= concat.build.dest %>']
+          'dist/app.js': ['<%= concat.build.dest %>']
         }
       }
     },
