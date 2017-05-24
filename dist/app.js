@@ -105159,7 +105159,7 @@ var loadState = {
     game.stage.backgroundColor = '#000000';
 
     /**** Load graphics assets ****/
-    game.load.spritesheet('characters', 'assets/sprites/characters.png', 24, 24);
+    game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
     // game.load.tilemap('level', 'assets/maps/room1.json', null, Phaser.Tilemap.TILED_JSON);
     // game.load.image('tiles', 'assets/sprites/world.png');
     /**** Load audio assets ****/
@@ -105171,29 +105171,33 @@ var loadState = {
 };
 
 var playState = {
+  player: null,
   create: function() {
-    var player = game.add.sprite(100, 200, 'characters');
-    player.frame = 9;
-    game.add.existing(player);
-    player.anchor.setTo(0.5, 1);
+    var self = this;
+    self.player = game.add.sprite(384, 384, 'character');
+    self.player.frame = 0;
+    game.add.existing(self.player);
+    self.player.anchor.setTo(0.5, 1);
+    self.player.animations.add('wait', [1,11,21,31,41,51,61,71], 4);
   },
   update: function() {
-
+    var self = this;
+    self.player.animations.play('wait');
   }
 };
 
 var titleState = {
   create: function (){
-    var nameLabel = game.add.text(160, 80, "Click anywhere to start", {
-      font: '14px Space Mono', fill: '#ffffff'
-    });
-    game.input.activePointer.capture = true;
-    
+    // var nameLabel = game.add.text(160, 80, "Click anywhere to start", {
+    //   font: '14px Space Mono', fill: '#ffffff'
+    // });
+    // game.input.activePointer.capture = true;
+    game.state.start('play');
   },
   update: function(){
-    if (game.input.activePointer.isDown) {
-      game.state.start('play');
-    }
+    // if (game.input.activePointer.isDown) {
+    //   game.state.start('play');
+    // }
   }
 };
 
