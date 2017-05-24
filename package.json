@@ -1,0 +1,20 @@
+{
+  "name": "ice_climber_clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "local": "rm -rf ./dist && mkdir ./dist && grunt local && nodemon .",
+    "build": "rm -rf ./dist && mkdir ./dist && grunt build && nodemon ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-qunit": "^2.0.0",
+    "grunt-contrib-uglify": "^3.0.1",
+    "nodemon": "^1.11.0"
+  }
+}
