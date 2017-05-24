@@ -105140,23 +105140,16 @@ PIXI.TextureSilentFail = true;
 /*
 * "What matters in this life is not what we do but what we do for others, the legacy we leave and the imprint we make." - Eric Meyer
 */
-;var boot = {
+
+
+var bootState = {
   create: function() {
     game.physics.startSystem(Phaser.Physics.Arcade);
     game.state.start('load');
   }
-};;var game = new Phaser.Game(420, 420, Phaser.AUTO, null, 'gameDiv');
+};
 
-// game states
-
-game.state.add('boot', boot);
-game.state.add('load', load);
-game.state.add('title', title);
-game.state.add('play', play);
-
-// call boot state
-
-game.state.start('boot');;var load = {
+var loadState = {
   preload: function() {
     var loadingLabel = game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#ffffff'});
 
@@ -105175,17 +105168,21 @@ game.state.start('boot');;var load = {
   create: function() {
     game.state.start('title');
   }
-};;var play = {
+};
+
+var playState = {
   create: function() {
     var player = game.add.sprite(100, 200, 'characters');
-    player.frame = 0;
+    player.frame = 9;
     game.add.existing(player);
     player.anchor.setTo(0.5, 1);
   },
   update: function() {
 
   }
-};;var title = {
+};
+
+var titleState = {
   create: function (){
     var nameLabel = game.add.text(160, 80, "Click anywhere to start", {
       font: '14px Space Mono', fill: '#ffffff'
@@ -105199,3 +105196,16 @@ game.state.start('boot');;var load = {
     }
   }
 };
+
+var game = new Phaser.Game(420, 420, Phaser.AUTO, null, 'gameDiv');
+
+// game states
+
+game.state.add('boot', bootState);
+game.state.add('load', loadState);
+game.state.add('title', titleState);
+game.state.add('play', playState);
+
+// call boot state
+
+game.state.start('boot');

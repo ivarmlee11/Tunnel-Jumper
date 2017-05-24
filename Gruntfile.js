@@ -4,14 +4,14 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       options: {
-        separator: ';'
+        separator: '\n'
       },
       local: {
-        src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js'],
+        src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js', 'src/js/start/*.js'],
         dest: 'dist/app.js',
       },
       build: {
-        src: ['src/js/vendor/min/phaser.min.js', 'src/js/*.js'],
+        src: ['src/js/vendor/min/phaser.min.js', 'src/js/*.js', 'src/js/start/*.js'],
         dest: 'dist/app.js',
       }
     },
