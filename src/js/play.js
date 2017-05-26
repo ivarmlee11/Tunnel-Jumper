@@ -4,6 +4,9 @@ var playState = function () {
   this.yAxis = p2.vec2.fromValues(0, 1);
   this.xSpeed = 150;
   this.ySpeed = 300;
+  this.jumpNumber = 0;
+  this.isJumpComboGoing = false;
+  this.timeOfLastJump = null;
 };
 
 playState.prototype.create = function() {
@@ -13,44 +16,38 @@ playState.prototype.create = function() {
 
   //gravity
   game.physics.p2.gravity.y = 400;
-  
+
   // player info
   this.player = game.add.sprite(384, 384, 'character');
-  this.player.frame = 0;
-  this.player.anchor.setTo(0.5, 0.5);
-  game.add.existing(this.player);
-
+  
   // attach physics to player
   game.physics.p2.enable(this.player);
-
-
-  // prevent sprite from flipping over
+  
+  this.player.frame = 0;
+  this.player.anchor.setTo(0.5, 0.5);
   this.player.body.fixedRotation = true;
 
+  game.add.existing(this.player);
+
+  // make contactable materials
   var spriteMaterial = game.physics.p2.createMaterial('spriteMaterial', this.player.body);
 
-  var worldMaterial = game.physics.p2.createMaterial('worldMaterial');
+  var wallMaterial = game.physics.p2.createMaterial('wallMaterial');
 
-  //  4 trues = the 4 faces of the world in left, right, top, bottom order
-  game.physics.p2.setWorldMaterial(worldMaterial, true, true, false, true);
+  game.physics.p2.setWorldMaterial(wallMaterial, true, true, false, false);
 
   //  Here is the contact material. It's a combination of 2 materials, so whenever shapes with
   //  those 2 materials collide it uses the following settings.
   //  A single material can be used by as many different sprites as you like.
-  var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, worldMaterial);
+  var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, wallMaterial);
 
-  contactMaterial.restitution = 0;
-  contactMaterial.friction = 0.3;     // Friction to use in the contact of these two materials.
-  contactMaterial.stiffness = 1e7;    // Stiffness of the resulting ContactEquation that this ContactMaterial generate.
-  contactMaterial.relaxation = 10;     // Relaxation of the resulting ContactEquation that this ContactMaterial generate.
-  contactMaterial.frictionStiffness = 1e7;    // Stiffness of the resulting FrictionEquation that this ContactMaterial generate.
-  contactMaterial.frictionRelaxation = 3;     // Relaxation of the resulting FrictionEquation that this ContactMaterial generate.
-  
+  // make the walls bounce
+  contactMaterial.restitution = 1.0;
+
   //  register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
   this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
   this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-  // this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
   this.shiftKey = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
 
   //  stop the following keys from propagating up to the browser
@@ -60,20 +57,15 @@ playState.prototype.create = function() {
   this.textLeft = game.add.text(20, 20, "Left was pressed 250 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
   this.textRight = game.add.text(20, 60, "Right was pressed 500 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
   this.textSpace = game.add.text(20, 100, "Space was pressed 1000 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  // this.textDown = game.add.text(20, 140, "Down was pressed 1000 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
   
   this.textLeft2 = game.add.text(20, 160, "Is left still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
   this.textRight2 = game.add.text(20, 180, "Is right still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
   this.textSpace2 = game.add.text(20, 220, "Is space still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  // this.textDown2 = game.add.text(20, 240, "Is down still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
 
   // player animations
   // this.player.animations.add('wait', [35, 36], 1, true); 
   this.player.animations.add('runLeft', [56, 57, 58, 59, 60, 61, 62, 63], 23);
   this.player.animations.add('runRight', [0, 1, 2, 3, 4, 5, 6, 7], 23);
-
-  // sets up walls
-  this.player.body.collideWorldBounds = true;
 };
 
 playState.prototype.update = function() {
@@ -86,7 +78,7 @@ playState.prototype.update = function() {
     this.player.body.moveRight(300);
     this.player.animations.play('runRight');
   }
-  //  If true, it means that this key is down. If not, it means that the key is not down (was released/not pressed)
+
   if ((this.leftKey.isDown) && (!this.shiftKey.isDown)) {
     this.player.body.moveLeft(150);
     this.player.animations.play('runLeft');
@@ -112,19 +104,6 @@ playState.prototype.update = function() {
     this.textSpace2.text = "Is space still down? NO";
   }
 
-  // if (this.downKey.isDown) {
-  //   this.player.body.moveDown(200);
-  //   this.textDown2.text = "Is space still down? YES";
-  // } else {
-  //   this.textDown2.text = "Is space still down? NO";
-  // }  
-  //  downDuration (previously called 'justPressed') does not schedule key pressing, it's merely indicative 
-  //  of key states. 
-  //  
-  //  In this case the downDuration function tells us that between this current time and 250 milliseconds ago, 
-  //  this key was pressed (not the same as holding down) and if it was pressed between that slice of time, it returns
-  //  true, otherwise false.
-
   if (this.leftKey.downDuration(250)) {
     this.textLeft.text = "Left was pressed 250 ms ago? YES";
   } else {
@@ -146,11 +125,10 @@ playState.prototype.update = function() {
 };
 
 function checkIfCanJump(yAxis) {
-  console.log('checking if can jump');
 
   var result = false;
 
-  for (var i=0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {
+  for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {
     var c = game.physics.p2.world.narrowphase.contactEquations[i];
 
     if (c.bodyA === this.player.body.data || c.bodyB === this.player.body.data) {
@@ -167,6 +145,14 @@ function checkIfCanJump(yAxis) {
   }
   
   return result;
+
+}
+
+// function bounceBack(wasPlayerRunningWhenHeHitWall) {
+//   if(this.player)
+// }
+
+function tripleJump() {
 
 }
 
