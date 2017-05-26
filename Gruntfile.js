@@ -37,6 +37,27 @@ module.exports = function(grunt) {
           module: true
         }
       }
+    },
+    nodemon: {
+      dev: {
+        script: 'index.js'
+      }
+    },
+    watch: {
+      express: {
+        files:  [ '**/*.js' ],
+        tasks:  [ 'jshint', 'concat:local', 'express:dev' ],
+        options: {
+          spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded 
+        }
+      }   
+    },
+    express: {
+      dev: {
+        options: {
+          script: 'index.js'
+        }
+      }
     }
   });
 
@@ -50,10 +71,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-qunit');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-express-server');
 
   grunt.registerTask('test', ['jshint']);
 
-  grunt.registerTask('local', ['jshint', 'concat:local']);
+  grunt.registerTask('local', ['jshint', 'concat:local', 'express:dev', 'watch']);
 
   grunt.registerTask('build', ['jshint', 'concat:build', 'uglify']);
 

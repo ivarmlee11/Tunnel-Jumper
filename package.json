@@ -4,17 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "local": "rm -rf ./dist && mkdir ./dist && grunt local && nodemon .",
-    "build": "rm -rf ./dist && mkdir ./dist && grunt build && nodemon ."
+    "local": "rm -rf ./dist && mkdir ./dist && grunt local",
+    "build": "rm -rf ./dist && mkdir ./dist && grunt build"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "grunt": "^1.0.1",
+    "grunt-concurrent": "^2.3.1",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-qunit": "^2.0.0",
     "grunt-contrib-uglify": "^3.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-express-server": "^0.5.3",
     "nodemon": "^1.11.0"
   }
 }
