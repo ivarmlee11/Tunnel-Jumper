@@ -6,13 +6,11 @@ loadState.prototype.preload = function() {
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.PageAlignHorizonally = true;
   game.scale.PageAlignVertically = true;
-  game.stage.backgroundColor = '#000000';
+  game.stage.backgroundColor = 'white';
 
-  /**** Load graphics assets ****/
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
-  // game.load.tilemap('level', 'assets/maps/room1.json', null, Phaser.Tilemap.TILED_JSON);
-  // game.load.image('tiles', 'assets/sprites/world.png');
-  /**** Load audio assets ****/
+  game.load.image('ground', 'assets/sprites/ground.png');
+  game.load.image('ice', 'assets/sprites/ice.png');
 };
 
 loadState.prototype.create = function() {

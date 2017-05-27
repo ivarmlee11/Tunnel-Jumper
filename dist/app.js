@@ -105159,13 +105159,11 @@ loadState.prototype.preload = function() {
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.PageAlignHorizonally = true;
   game.scale.PageAlignVertically = true;
-  game.stage.backgroundColor = '#000000';
+  game.stage.backgroundColor = 'white';
 
-  /**** Load graphics assets ****/
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
-  // game.load.tilemap('level', 'assets/maps/room1.json', null, Phaser.Tilemap.TILED_JSON);
-  // game.load.image('tiles', 'assets/sprites/world.png');
-  /**** Load audio assets ****/
+  game.load.image('ground', 'assets/sprites/ground.png');
+  game.load.image('ice', 'assets/sprites/ice.png');
 };
 
 loadState.prototype.create = function() {
@@ -105174,12 +105172,14 @@ loadState.prototype.create = function() {
 
 var playState = function () {
   this.player = null;
+  this.ground = null;
+  this.platform = null;
   this.jumpTimer = 0;
   this.yAxis = p2.vec2.fromValues(0, 1);
   this.xSpeed = 150;
   this.ySpeed = 300;
   this.jumpNumber = 0;
-  this.isJumpComboGoing = false;
+  this.isJumpComboRunning = false;
   this.timeOfLastJump = null;
 };
 
@@ -105188,24 +105188,58 @@ playState.prototype.create = function() {
   // game physics
   game.physics.startSystem(Phaser.Physics.P2JS);
 
-  //gravity
+  // gravity + friction
   game.physics.p2.gravity.y = 400;
+  game.physics.p2.friction = 4;
+
+  // allow for collision callbacks
+  game.physics.p2.setImpactEvents(true);
+
+  // collision groups
+  var playerCollisionGroup = game.physics.p2.createCollisionGroup();
+  var platformCollisionGroup = game.physics.p2.createCollisionGroup();
+
+  // set up platforms
+  var platforms = game.add.group();
+  platforms.enableBody = true;
+  platforms.physicsBodyType = Phaser.Physics.P2JS;
+
+  // create platform
+  for (var i = 0; i < 4; i++) {
+    var platform = platforms.create(game.world.randomX, game.world.randomY, 'ice');
+    platform.body.setRectangle(40, 40);
+
+    //  Tell the panda to use the pandaCollisionGroup 
+    platform.body.setCollisionGroup(platformCollisionGroup);
+
+    //  Pandas will collide against themselves and the player
+    //  If you don't set this they'll not collide with anything.
+    //  The first parameter is either an array or a single collision group.
+    platform.body.collides([platformCollisionGroup, playerCollisionGroup]);
+  }
+
+  // add player
+  this.player = game.add.sprite(250, 250, 'character');
+
+  // apply physics to player
+  game.physics.p2.enable(this.player);
 
   // player info
-  this.player = game.add.sprite(384, 384, 'character');
-  
-  // attach physics to player
-  game.physics.p2.enable(this.player);
-  
   this.player.frame = 0;
-  this.player.anchor.setTo(0.5, 0.5);
+  this.player.name = 'player';
+  this.player.anchor.setTo(0.5, 0.3);
   this.player.body.fixedRotation = true;
 
+  // add player to game
   game.add.existing(this.player);
 
+  // add ground
+  this.ground = game.add.sprite(0, game.world.height-24, 'ground'); 
+  game.physics.p2.enable(this.ground);
+  this.ground.body.static = true;
+  
   // make contactable materials
   var spriteMaterial = game.physics.p2.createMaterial('spriteMaterial', this.player.body);
-
   var wallMaterial = game.physics.p2.createMaterial('wallMaterial');
 
   game.physics.p2.setWorldMaterial(wallMaterial, true, true, false, false);
@@ -105215,8 +105249,8 @@ playState.prototype.create = function() {
   //  A single material can be used by as many different sprites as you like.
   var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, wallMaterial);
 
-  // make the walls bounce
-  contactMaterial.restitution = 1.0;
+  // make the walls bouncy
+  contactMaterial.restitution = 0.89;
 
   //  register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -105272,7 +105306,6 @@ playState.prototype.update = function() {
   if (this.spaceKey.isDown && game.time.now > this.jumpTimer && checkIfCanJump.call(this, this.yAxis)) {
     this.player.body.moveUp(220);
     this.jumpTimer = game.time.now + 440;
-    console.log(this.jumpTimer);
     this.textSpace2.text = "Is space still down? YES";
   } else {
     this.textSpace2.text = "Is space still down? NO";
@@ -105322,10 +105355,6 @@ function checkIfCanJump(yAxis) {
 
 }
 
-// function bounceBack(wasPlayerRunningWhenHeHitWall) {
-//   if(this.player)
-// }
-
 function tripleJump() {
 
 }
@@ -105345,7 +105374,6 @@ titleState.prototype.update = function() {
 
 };
 var game = new Phaser.Game(420, 420, Phaser.AUTO, null, 'gameDiv');
-
 // game states
 
 game.state.add('boot', bootState);
