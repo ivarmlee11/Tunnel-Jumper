@@ -105173,14 +105173,14 @@ loadState.prototype.create = function() {
 var playState = function () {
   this.player = null;
   this.ground = null;
-  this.platform = null;
-  this.jumpTimer = 0;
   this.yAxis = p2.vec2.fromValues(0, 1);
   this.xSpeed = 150;
-  this.ySpeed = 300;
+  this.ySpeed = 400;
+  this.shiftBoost = 150;
   this.jumpNumber = 0;
-  this.isJumpComboRunning = false;
-  this.timeOfLastJump = null;
+  this.liftOff = null;
+  this.landed = null;
+  this.playerOnGround = null;
 };
 
 playState.prototype.create = function() {
@@ -105189,34 +105189,12 @@ playState.prototype.create = function() {
   game.physics.startSystem(Phaser.Physics.P2JS);
 
   // gravity + friction
-  game.physics.p2.gravity.y = 400;
-  game.physics.p2.friction = 4;
+  game.physics.p2.gravity.y = 600;
+  game.physics.p2.friction = 0.5;
 
   // allow for collision callbacks
   game.physics.p2.setImpactEvents(true);
-
-  // collision groups
-  var playerCollisionGroup = game.physics.p2.createCollisionGroup();
-  var platformCollisionGroup = game.physics.p2.createCollisionGroup();
-
-  // set up platforms
-  var platforms = game.add.group();
-  platforms.enableBody = true;
-  platforms.physicsBodyType = Phaser.Physics.P2JS;
-
-  // create platform
-  for (var i = 0; i < 4; i++) {
-    var platform = platforms.create(game.world.randomX, game.world.randomY, 'ice');
-    platform.body.setRectangle(40, 40);
-
-    //  Tell the panda to use the pandaCollisionGroup 
-    platform.body.setCollisionGroup(platformCollisionGroup);
-
-    //  Pandas will collide against themselves and the player
-    //  If you don't set this they'll not collide with anything.
-    //  The first parameter is either an array or a single collision group.
-    platform.body.collides([platformCollisionGroup, playerCollisionGroup]);
-  }
+  game.physics.p2.world.setGlobalStiffness(1e5);
 
   // add player
   this.player = game.add.sprite(250, 250, 'character');
@@ -105227,7 +105205,7 @@ playState.prototype.create = function() {
   // player info
   this.player.frame = 0;
   this.player.name = 'player';
-  this.player.anchor.setTo(0.5, 0.3);
+  this.player.anchor.setTo(0.5, 0.28);
   this.player.body.fixedRotation = true;
 
   // add player to game
@@ -105248,10 +105226,11 @@ playState.prototype.create = function() {
   //  those 2 materials collide it uses the following settings.
   //  A single material can be used by as many different sprites as you like.
   var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, wallMaterial);
-
+  
   // make the walls bouncy
-  contactMaterial.restitution = 0.89;
+  contactMaterial.restitution = 0.9;
 
+  // ----------------------------- //
   //  register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
   this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
@@ -105260,15 +105239,6 @@ playState.prototype.create = function() {
 
   //  stop the following keys from propagating up to the browser
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.DOWN ]);
-  
-  //  debugging text
-  this.textLeft = game.add.text(20, 20, "Left was pressed 250 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  this.textRight = game.add.text(20, 60, "Right was pressed 500 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  this.textSpace = game.add.text(20, 100, "Space was pressed 1000 ms ago? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  
-  this.textLeft2 = game.add.text(20, 160, "Is left still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  this.textRight2 = game.add.text(20, 180, "Is right still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
-  this.textSpace2 = game.add.text(20, 220, "Is space still down? NO", { font: "16px Arial", fill: "#ffffff", align: "center" });
 
   // player animations
   // this.player.animations.add('wait', [35, 36], 1, true); 
@@ -105278,60 +105248,71 @@ playState.prototype.create = function() {
 
 playState.prototype.update = function() {
 
+  this.playerOnGround = playerOnGround.call(this, this.yAxis);
+
+  console.log('player is on the ground ', this.playerOnGround);
+
+  if(!this.playerOnGround) {
+    this.landed = getCurrentTimeInSeconds();
+    // console.log('landed time ', this.landed);
+  }
+  
+
   if ((this.leftKey.isDown) && (this.shiftKey.isDown)) {
-    this.player.body.moveLeft(300);
+    this.player.body.moveLeft(this.xSpeed + this.shiftBoost);
     this.player.animations.play('runLeft');
   }
   if ((this.rightKey.isDown) && (this.shiftKey.isDown)) {
-    this.player.body.moveRight(300);
+    this.player.body.moveRight(this.xSpeed + this.shiftBoost);
     this.player.animations.play('runRight');
   }
 
   if ((this.leftKey.isDown) && (!this.shiftKey.isDown)) {
-    this.player.body.moveLeft(150);
+    this.player.body.moveLeft(this.xSpeed);
     this.player.animations.play('runLeft');
-    this.textLeft2.text = "Is left still down? YES";
-  } else {
-    this.textLeft2.text = "Is left still down? NO";
-  } 
+  }
 
   if ((this.rightKey.isDown) && (!this.shiftKey.isDown)) {
-    this.player.body.moveRight(150);
+    this.player.body.moveRight(this.xSpeed);
     this.player.animations.play('runRight');
-    this.textRight2.text = "Is right still down? YES";
-  } else {
-    this.textRight2.text = "Is right still down? NO";
   }
 
-  if (this.spaceKey.isDown && game.time.now > this.jumpTimer && checkIfCanJump.call(this, this.yAxis)) {
-    this.player.body.moveUp(220);
-    this.jumpTimer = game.time.now + 440;
-    this.textSpace2.text = "Is space still down? YES";
-  } else {
-    this.textSpace2.text = "Is space still down? NO";
-  }
+  if (this.spaceKey.justPressed() && playerOnGround.call(this, this.yAxis)) {
+    this.liftOff = getCurrentTimeInSeconds();
 
-  if (this.leftKey.downDuration(250)) {
-    this.textLeft.text = "Left was pressed 250 ms ago? YES";
-  } else {
-    this.textLeft.text = "Left was pressed 250 ms ago? NO";
-  }
+    var timeDiff = this.liftOff - this.landed;
+    console.log(timeDiff, ' time diff');
+
+    if(timeDiff < 1) {
+      if(this.jumpNumber < 3) {
+        this.jumpNumber += 1; 
+      } else {
+        this.jumpNumber = 3;
+      }
+    } else {
+      this.jumpNumber = 0;
+    }
+    console.log('jump number ', this.jumpNumber);
+
+    switch(this.jumpNumber) {
+      case 2:
+        this.ySpeed = 450;
+        break;
+      case 3:
+        this.ySpeed = 599;
+        break;
+      default:
+        this.ySpeed = 400;
+    }
+
+    this.player.body.moveUp(this.ySpeed);
   
-  if (this.rightKey.downDuration(250)) {
-    this.textRight.text = "Right was pressed 250 ms ago? YES";
-  } else {
-    this.textRight.text = "Right was pressed 250 ms ago? NO";
-  }
-  
-  if (this.spaceKey.downDuration(250)) {
-    this.textSpace.text = "Space was pressed 250 ms ago? YES";
-  } else {
-    this.textSpace.text = "Space was pressed 250 ms ago? NO";
+    console.log('player is in the air');
   }
 
 };
 
-function checkIfCanJump(yAxis) {
+function playerOnGround(yAxis) {
 
   var result = false;
 
@@ -105342,11 +105323,11 @@ function checkIfCanJump(yAxis) {
       var d = p2.vec2.dot(c.normalA, yAxis);
 
       if (c.bodyA === this.player.body.data) {
-          d *= -1;
+        d *= -1;
       }
 
-      if (d > 0.5) {
-          result = true;
+      if (d > 0.1) {
+        result = true;
       }
     }
   }
@@ -105355,10 +105336,16 @@ function checkIfCanJump(yAxis) {
 
 }
 
-function tripleJump() {
-
+function getCurrentTimeInSeconds() {
+  var date = new Date();
+  var milliseconds = date.getTime();
+  var seconds = milliseconds / 1000;
+  return seconds;
 }
 
+function playerTouchedDown() {
+
+}
 
 var titleState = function() {};
 
