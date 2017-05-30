@@ -6,11 +6,13 @@ loadState.prototype.preload = function() {
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.PageAlignHorizonally = true;
   game.scale.PageAlignVertically = true;
-  game.stage.backgroundColor = 'white';
 
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
   game.load.image('ground', 'assets/sprites/ground.png');
-  game.load.image('ice', 'assets/sprites/ice.png');
+  game.load.image('whisps', 'assets/sprites/whisps.png');
+  game.load.image('big_ice', 'assets/sprites/big_ice.png');
+  game.load.image('med_ice', 'assets/sprites/med_ice.png');
+  game.load.image('small_ice', 'assets/sprites/small_ice.png');
 };
 
 loadState.prototype.create = function() {
