@@ -225,7 +225,6 @@ function playerOnGround(yAxis) {
   }
   
   return result;
-
 }
 
 function getCurrentTimeInSeconds() {
