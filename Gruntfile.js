@@ -11,7 +11,7 @@ module.exports = function(grunt) {
         dest: 'dist/app.js',
       },
       build: {
-        src: ['src/js/vendor/min/phaser.min.js', 'src/js/*.js', 'src/js/start/*.js'],
+        src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js', 'src/js/start/*.js'],
         dest: 'dist/app.js',
       }
     },

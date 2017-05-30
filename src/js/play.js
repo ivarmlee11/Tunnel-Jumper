@@ -68,7 +68,7 @@ playState.prototype.create = function() {
   game.add.existing(this.player);
 
   // add some dimensions and sensors to the player
-  this.playerShape = this.player.body.setCircle(10, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
+  this.playerShape = this.player.body.setCircle(8, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
 
   this.playerSensorTop = this.player.body.addRectangle(10, 10, 0, -20);  // upper sensor shape  (width,height,offsetX,offsetY)
   
