@@ -70,19 +70,19 @@ playState.prototype.create = function() {
   // add some dimensions and sensors to the player
   this.playerShape = this.player.body.setCircle(10, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
 
-  this.playerSensorTop = this.player.body.addRectangle(5, 10, 0, -54);  // upper sensor shape  (width,height,offsetX,offsetY)
+  this.playerSensorTop = this.player.body.addRectangle(10, 10, 0, -20);  // upper sensor shape  (width,height,offsetX,offsetY)
   
   this.playerSensorTop.sensor = true;
   
-  this.playerSensorBottom = this.player.body.addRectangle(10, 10, 0, 54);
+  this.playerSensorBottom = this.player.body.addRectangle(10, 10, 0, 20);
   
   this.playerSensorBottom.sensor = true;
 
-  this.playerSensorRight = this.player.body.addRectangle(5, 10, 10, 0);
+  this.playerSensorRight = this.player.body.addRectangle(10, 10, 20, 0);
 
   this.playerSensorRight.sensor = true;
 
-  this.playerSensorLeft = this.player.body.addRectangle(5, 10, -10, 0);
+  this.playerSensorLeft = this.player.body.addRectangle(10, 10, -20, 0);
 
   this.playerSensorLeft.sensor = true;
 
