@@ -11,6 +11,11 @@ loadState.prototype.preload = function() {
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
 
   game.load.image('background', 'assets/sprites/background.png');
+  game.load.image('dust', 'assets/sprites/dust.png');
+  game.load.image('charge0', 'assets/sprites/charge0.png');
+  game.load.image('charge1', 'assets/sprites/charge1.png');
+  game.load.image('charge2', 'assets/sprites/charge2.png');
+  game.load.image('charge3', 'assets/sprites/charge3.png');
   game.load.image('ground', 'assets/sprites/ground.png');
   game.load.image('spikes', 'assets/sprites/spikes.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');

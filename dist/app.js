@@ -105164,6 +105164,11 @@ loadState.prototype.preload = function() {
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
 
   game.load.image('background', 'assets/sprites/background.png');
+  game.load.image('dust', 'assets/sprites/dust.png');
+  game.load.image('charge0', 'assets/sprites/charge0.png');
+  game.load.image('charge1', 'assets/sprites/charge1.png');
+  game.load.image('charge2', 'assets/sprites/charge2.png');
+  game.load.image('charge3', 'assets/sprites/charge3.png');
   game.load.image('ground', 'assets/sprites/ground.png');
   game.load.image('spikes', 'assets/sprites/spikes.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');
@@ -105184,6 +105189,7 @@ var playState = function () {
   this.ySpeed = 660;
   this.shiftBoost = 260;
   this.jumpNumber = 0;
+  this.timeOnGround = 0;
   this.liftOff = null;
   this.landed = null;
   this.playerOnGround = null;
@@ -105238,6 +105244,9 @@ playState.prototype.create = function() {
   // map settings
   game.add.tileSprite(-150, -100, 1000, 1000, 'background');
 
+  // world bounds
+  game.world.setBounds(0, 0, game.world.bounds.width, game.world.bounds.height + 100);
+
   // add player
   this.player = game.add.sprite(250, 250, 'character');
 
@@ -105281,7 +105290,7 @@ playState.prototype.create = function() {
   this.player.body.onBeginContact.add(checkSensors, this);
 
   // add ground so the player doesn't bouce around on the world border on game start
-  this.ground = game.add.sprite(0, game.world.height + 10, 'ground'); 
+  this.ground = game.add.sprite(0, game.world.bounds.height - 100, 'ground'); 
   game.physics.p2.enable(this.ground);
   this.ground.body.static = true;
 
@@ -105301,7 +105310,8 @@ playState.prototype.create = function() {
   this.wallSpriteContactMaterial.restitution = 0.9;
   
   // places wall materials along the sides of the game world
-  game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
+  // game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
+  game.physics.p2.setBoundsToWorld();
 
   // register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -105313,15 +105323,20 @@ playState.prototype.create = function() {
   // stop the following keys from propagating up to the browser
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.SHIFT, Phaser.Keyboard.DOWN ]);
 
-
   // points
-  this.pointsLabel = game.add.text(100, game.world.bounds.height - 20, 'Points', {font: '12px Courier', fill: '#ffffff'});
+  this.pointsLabel = game.add.text(100, game.world.bounds.height - 135, 'Points', {font: '12px Courier', fill: '#ffffff'});
   
   // points to set
-  this.pointsSetLabel = game.add.text(149, game.world.bounds.height - 20, '0', {font: '12px Courier', fill: '#ffffff'});
+  this.pointsSetLabel = game.add.text(149, game.world.bounds.height - 135, '0', {font: '12px Courier', fill: '#ffffff'});
 
   // pause
-  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 20, 'Pause', {font: '12px Courier', fill: '#ffffff'});
+  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'Pause', {font: '12px Courier', fill: '#ffffff'});
+
+  // combo indicator
+  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'Combo', {font: '12px Courier', fill: '#ffffff'});
+  this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
+
+
   
   this.pauseLabel.inputEnabled = true;
   this.pauseLabel.events.onInputUp.add(function () {
@@ -105332,11 +105347,18 @@ playState.prototype.create = function() {
     } else {
       this.pauseLabel.setText('Pause');
     }
-  });
+  }.bind(this));
 
 };
 
 playState.prototype.update = function() {
+
+  this.timeOnGround += 0.01;
+
+  if((this.jumpNumber > 0) && (this.timeOnGround > 1) && (playerOnGround.call(this, this.yAxis))) {
+    this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
+  }
+
   if(this.updateCycle == 1) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
   }
@@ -105386,9 +105408,11 @@ playState.prototype.update = function() {
   if (this.spaceKey.justPressed() && playerOnGround.call(this, this.yAxis)) {
     this.liftOff = getCurrentTimeInSeconds();
 
-    var timeDiff = this.liftOff - this.landed;
+    this.timeOnGround = 0;
 
-    if(timeDiff < 0.2) {
+    this.timeDiff = this.liftOff - this.landed;
+
+    if(this.timeDiff < 0.2) {
      
       if(this.jumpNumber < 3) {
         this.jumpNumber += 1; 
@@ -105402,40 +105426,47 @@ playState.prototype.update = function() {
       if(this.currentCombo > 0) {
         this.comboPoints = this.currentCombo * 1000;
         this.wallSpriteContactMaterial.restitution = 0.9;
-        console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
+        // console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
       }
 
       this.currentCombo = 0;
       this.jumpNumber = 0;
     }
-    console.log(this.jumpNumber, ' jump number');
+    // console.log(this.jumpNumber, ' jump number');
     switch(this.jumpNumber) {
       case 0:
         game.physics.p2.gravity.y = 1500;
         this.ySpeed = 550;
         this.xSpeed = 150;
+        this.player.scale.setTo(0.6, 0.6);
+        this.player.anchor.setTo(0.5, 0.3);
+        this.player.body.fixedRotation = true;
+        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
         this.ySpeed = 575;
+        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
         this.ySpeed = 600;
+        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
         this.ySpeed = 670;
         this.xSpeed = 300;
         game.physics.p2.gravity.y = 1000;
+        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
         this.wallSpriteContactMaterial.restitution = 1.05;
 
-        console.log('on that three jump streak');
-        console.log('current combo ', this.currentCombo);
+        this.player.anchor.setTo(0.5, 0.65);
+        this.player.body.fixedRotation = false;
+        this.player.scale.setTo(1, 1);
     }
     this.player.body.moveUp(this.ySpeed);
   
   }
 
   if ((this.downKey.isDown) && (this.player.body.x > 20) && (this.player.body.x < (game.world.bounds.width - 20)) && (this.updateCycle > 750) && (playerOnGround.call(this, this.yAxis))) {
-    console.log('falling through');
     game.physics.p2.friction = 0.1;
     this.playerShape.sensor = true;
     game.physics.p2.friction = 0.5;
@@ -105449,7 +105480,6 @@ playState.prototype.update = function() {
 };
 
 function playerOnGround(yAxis) {
-
   var result = false;
 
   for (var i = 0; i < game.physics.p2.world.narrowphase.contactEquations.length; i++) {
@@ -105479,7 +105509,6 @@ function getCurrentTimeInSeconds() {
 }
 
 function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
-
   var thisLevel = stage;
 
   // console.log(thisLevel, ' level');
@@ -105497,42 +105526,37 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
   // console.log(levelChoice, ' level choice');
 
   var platform = platformGroup.create(randomXAxis, -90, levelChoice);
-      switch(levelChoice) {
-        case 'big_ice':
-          platform.scale.setTo(randWidthScale, 0.3);
-          break;
-        case 'med_ice':
-          platform.scale.setTo(randWidthScale, 0.3);
-          break;
-        case 'small_ice':
-          platform.scale.setTo(randWidthScale, 0.3);
-          break;
-        default:
-      }
-      platform.name = 'platform';                      
-      game.physics.p2.enable(platform, true);                     
-      platform.body.kinematic = true;                              
-      platform.velo = this.platformVelo;  
+
+  switch(levelChoice) {
+    case 'big_ice':
+      platform.scale.setTo(randWidthScale, 0.3);
+      break;
+    case 'med_ice':
+      platform.scale.setTo(randWidthScale, 0.3);
+      break;
+    case 'small_ice':
+      platform.scale.setTo(randWidthScale, 0.3);
+      break;
+    default:
+  }
+  platform.name = 'platform';                      
+  game.physics.p2.enable(platform, true);                     
+  platform.body.kinematic = true;                              
+  platform.velo = this.platformVelo;  
 }
 
 function checkSensors(bodyA, shapeA, shapeB, contactEquation) {
-
   if (bodyA && bodyA.sprite && bodyA.sprite.name === 'platform' && (shapeB === this.playerSensorTop)) {
     this.playerShape.sensor = true;
-    console.log('top');
   }
 
   if (shapeB === this.playerSensorBottom) {
     this.playerShape.sensor = false;
-    console.log(this.points.total, ' total points calced');
-    console.log(this.updateCycle + this.comboPoints, ' total points check');
-    console.log('bottom');
   }
 
 }
 
 function movePlatforms(platform) {
-
   platform.body.velocity.y += 0.094;
 
   if (platform.body.y > game.world.bounds.height + 20) {
