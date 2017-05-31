@@ -4,8 +4,9 @@ loadState.prototype.preload = function() {
   var loadingLabel = game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#ffffff'});
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-  game.scale.PageAlignHorizonally = true;
-  game.scale.PageAlignVertically = true;
+  game.scale.pageAlignHorizontally = true;
+  game.scale.pageAlignVertically = true;
+  game.scale.refresh();
 
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
 
