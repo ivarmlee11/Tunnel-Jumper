@@ -105164,7 +105164,7 @@ loadState.prototype.preload = function() {
 
   game.load.image('background', 'assets/sprites/background.png');
   game.load.image('ground', 'assets/sprites/ground.png');
-  game.load.image('whisps', 'assets/sprites/whisps.png');
+  game.load.image('spikes', 'assets/sprites/spikes.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');
   game.load.image('med_ice', 'assets/sprites/med_ice.png');
   game.load.image('small_ice', 'assets/sprites/small_ice.png');
@@ -105178,9 +105178,9 @@ var playState = function () {
   this.player = null;
   this.ground = null;
   this.yAxis = p2.vec2.fromValues(0, 1);
-  this.xSpeed = 150;
-  this.ySpeed = 800;
-  this.shiftBoost = 150;
+  this.xSpeed = 200;
+  this.ySpeed = 660;
+  this.shiftBoost = 260;
   this.jumpNumber = 0;
   this.liftOff = null;
   this.landed = null;
@@ -105188,27 +105188,39 @@ var playState = function () {
   this.movingPlatforms = null;
   this.playerSensorBottom = null;
   this.playerSensorTop = null;
+  this.playerSensorLeft = null;
+  this.playerSensorRight = null;
   this.playerShape = null;
   this.platformVelo = 0.05;
   this.platformInterval = 1.5;  
   this.updateCycle = 1;
+  this.comboPoints = 0;
+  this.currentCombo = 0;
+  this.points = {
+    calcPoints: function(updateCycle, comboPoints) {
+      var allPoints = updateCycle + comboPoints;
+      this.points.total = allPoints;
+      return allPoints;
+    }.bind(this),
+    total: null
+  };
   this.levels = {
-                1: {
-                  1: "big_ice",
-                  2: "small_ice",
-                  3: "med_ice"
-                },
-                2: {
-                  1: "big_ice",
-                  2: "small_ice",
-                  3: "small_ice"
-                },
-                3: {
-                  1: "small_ice",
-                  2: "small_ice",
-                  3: "small_ice"
-                }
-              };
+    1: {
+      1: "big_ice",
+      2: "small_ice",
+      3: "med_ice"
+    },
+    2: {
+      1: "big_ice",
+      2: "small_ice",
+      3: "small_ice"
+    },
+    3: {
+      1: "small_ice",
+      2: "small_ice",
+      3: "small_ice"
+    }
+  };
 };
 
 playState.prototype.create = function() {
@@ -105221,8 +105233,7 @@ playState.prototype.create = function() {
   game.physics.p2.friction = 0.5;
 
   // map settings
-  game.stage.backgroundColor = '#000080';
-  game.add.tileSprite(40, 40, 400, 600, 'background');
+  game.add.tileSprite(-150, -100, 1000, 1000, 'background');
 
   // add player
   this.player = game.add.sprite(250, 250, 'character');
@@ -105245,7 +105256,7 @@ playState.prototype.create = function() {
   game.add.existing(this.player);
 
   // add some dimensions and sensors to the player
-  this.playerShape = this.player.body.setCircle(8, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
+  this.playerShape = this.player.body.setCircle(10, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
 
   this.playerSensorTop = this.player.body.addRectangle(10, 10, 0, -20);  // upper sensor shape  (width,height,offsetX,offsetY)
   
@@ -105255,26 +105266,22 @@ playState.prototype.create = function() {
   
   this.playerSensorBottom.sensor = true;
 
-  this.playerSensorRight = this.player.body.addRectangle(10, 10, 20, 0);
+  this.playerSensorRight = this.player.body.addRectangle(10, 10, -20, 0);
 
   this.playerSensorRight.sensor = true;
 
-  this.playerSensorLeft = this.player.body.addRectangle(10, 10, -20, 0);
+  this.playerSensorLeft = this.player.body.addRectangle(10, 10, 20, 0);
 
   this.playerSensorLeft.sensor = true;
 
   this.player.body.onBeginContact.add(checkSensors, this);
 
   // add ground so the player doesn't bouce around on the world border on game start
-  this.ground = game.add.sprite(0, game.world.height - 4, 'ground'); 
+  this.ground = game.add.sprite(0, game.world.height + 10, 'ground'); 
   game.physics.p2.enable(this.ground);
   this.ground.body.static = true;
 
-  // add timer to destroy ground and replace it with spikes
-  game.time.events.add(Phaser.Timer.SECOND * 10, function() {
-    this.ground.destroy();
-    this.ground = game.add.sprite(0, game.world.height, 'whisps');
-  }, this);
+  game.time.events.add(Phaser.Timer.SECOND * 15, moveGround.bind(this));
 
   // collision groups
   this.movingPlatforms = game.add.group();
@@ -105297,22 +105304,27 @@ playState.prototype.create = function() {
   this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
   this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
   this.shiftKey = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+  this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
 
   // stop the following keys from propagating up to the browser
-  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.DOWN ]);
+  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.SHIFT, Phaser.Keyboard.DOWN ]);
 };
 
 playState.prototype.update = function() {
+  if(this.updateCycle == 1) {
+    makePlatforms.call(this, this.player, this.movingPlatforms, 1);
+  }
   this.updateCycle += 1;
+
   var cyc = this.updateCycle;
 
-  if ((cyc < 3000) && (cyc % 125 === 0)) {
+  if ((cyc < 3000) && (cyc % 100 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 1);
-  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 135 === 0)) {
+  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 100 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 2);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 2);
-  } else if ((cyc >= 6000)  && (cyc % 145 === 0)) {
+  } else if ((cyc >= 6000)  && (cyc % 100 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 3);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 3);
   }
@@ -105350,34 +105362,61 @@ playState.prototype.update = function() {
 
     var timeDiff = this.liftOff - this.landed;
 
-    if(timeDiff < 0.35) {
+    if(timeDiff < 0.15) {
+     
       if(this.jumpNumber < 3) {
         this.jumpNumber += 1; 
       } else {
         this.jumpNumber = 3;
+        this.currentCombo += 1;
       }
+    
     } else {
+
+      if(this.currentCombo > 0) {
+        this.comboPoints = this.currentCombo * 10000;
+        console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
+      }
+
+      this.currentCombo = 0;
       this.jumpNumber = 0;
     }
-
+    console.log(this.jumpNumber, ' jump number');
     switch(this.jumpNumber) {
-      case 2:
-        this.ySpeed = 850;
+      case 0:
+        this.ySpeed = 660;
+        this.xSpeed = 150;
         break;
-      case 3:
-        this.ySpeed = 905;
-        this.xSpeed = 300;
+      case 1:
+        this.ySpeed = 660;
+        this.xSpeed = 150;
+        break;
+      case 2:
+        this.ySpeed = 700;
+        this.xSpeed = 150;
+        break;
+      case 2:
+        this.ySpeed = 800;
         break;
       default:
-        this.ySpeed = 800;
-        this.xSpeed = 150;
+        this.ySpeed = 900;
+        console.log('on that three jump streak');
+        console.log('current combo ', this.currentCombo);
     }
 
     this.player.body.moveUp(this.ySpeed);
   
   }
+
+  if ((this.downKey.isDown) && (this.updateCycle > 750)) {
+    console.log('falling through');
+    this.playerShape.sensor = true;
+  }
+
   
   this.movingPlatforms.forEach(movePlatforms, this);
+
+  this.points.calcPoints(this.updateCycle, this.comboPoints);
 
 };
 
@@ -105411,21 +105450,23 @@ function getCurrentTimeInSeconds() {
   return seconds;
 }
 
-function makePlatforms(player, platformGroup, stage) {
+function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   var thisLevel = stage;
 
-  console.log(thisLevel, ' level');
+  // console.log(thisLevel, ' level');
 
   var randomXAxis = ((Math.random() * game.world.bounds.width) + 1);
 
   var randomLevelSegmentChoice = Math.floor(((Math.random() * 3) + 1));
-  console.log(randomLevelSegmentChoice, ' randomLevelSegmentChoice');
+
+  // console.log(randomLevelSegmentChoice, ' randomLevelSegmentChoice');
 
   var levelChoice = this.levels[thisLevel][randomLevelSegmentChoice];
-  console.log(' level choice', levelChoice);
 
-  var platform = platformGroup.create(randomXAxis, -150, levelChoice);
+  // console.log(levelChoice, ' level choice');
+
+  var platform = platformGroup.create(randomXAxis, -90, levelChoice);
       platform.name = 'platform';                      
       game.physics.p2.enable(platform, true);                     
       platform.body.kinematic = true;                              
@@ -105434,18 +105475,18 @@ function makePlatforms(player, platformGroup, stage) {
 
 function checkSensors(bodyA, shapeA, shapeB, contactEquation) {
 
-  if (bodyA && bodyA.sprite && bodyA.sprite.name === 'platform' && shapeB === this.playerSensorTop) {
+  if (bodyA && bodyA.sprite && bodyA.sprite.name === 'platform' && (shapeB === this.playerSensorTop)) {
     this.playerShape.sensor = true;
-    console.log('touching moving platform with upper sensor or side sensors');
+    console.log('top');
   }
-  if (shapeB === (this.playerSensorBottom)) {
+
+  if (shapeB === this.playerSensorBottom) {
     this.playerShape.sensor = false;
-    console.log('touching something with lower sensor');
+    console.log(this.points.total, ' total points calced');
+    console.log(this.updateCycle + this.comboPoints, ' total points check');
+    console.log('bottom');
   }
-  // if (shapeB === (this.playerSensorLeft || this.playerSensorRight)) {
-  //   this.playerShape.sensor = true;
-  //   console.log('lols'); 
-  // }
+
 }
 
 function movePlatforms(platform) {
@@ -105456,6 +105497,14 @@ function movePlatforms(platform) {
     platform.destroy();
   }
 
+}
+
+function moveGround() {
+  game.add.tween(this.ground).to( { alpha: 0 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
+  var ground = this.ground;
+  setTimeout(function() {
+    ground.destroy();
+  }, 2000);
 }
 
 

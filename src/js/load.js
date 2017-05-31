@@ -11,7 +11,7 @@ loadState.prototype.preload = function() {
 
   game.load.image('background', 'assets/sprites/background.png');
   game.load.image('ground', 'assets/sprites/ground.png');
-  game.load.image('whisps', 'assets/sprites/whisps.png');
+  game.load.image('spikes', 'assets/sprites/spikes.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');
   game.load.image('med_ice', 'assets/sprites/med_ice.png');
   game.load.image('small_ice', 'assets/sprites/small_ice.png');
