@@ -8,6 +8,8 @@ loadState.prototype.preload = function() {
   game.scale.PageAlignVertically = true;
 
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
+
+  game.load.image('background', 'assets/sprites/background.png');
   game.load.image('ground', 'assets/sprites/ground.png');
   game.load.image('whisps', 'assets/sprites/whisps.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');

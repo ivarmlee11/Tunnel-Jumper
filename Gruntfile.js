@@ -6,10 +6,6 @@ module.exports = function(grunt) {
       options: {
         separator: '\n'
       },
-      local: {
-        src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js', 'src/js/start/*.js'],
-        dest: 'dist/app.js',
-      },
       build: {
         src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js', 'src/js/start/*.js'],
         dest: 'dist/app.js',
@@ -49,7 +45,7 @@ module.exports = function(grunt) {
     watch: {
       express: {
         files:  [ 'src/js/start/game.js', 'src/js/*.js', 'assets/**/*.png', 'index.html' ],
-        tasks:  ['clean', 'jshint', 'concat:local', 'express:dev'],
+        tasks:  ['clean', 'jshint', 'concat:build', 'express:dev'],
         options: {
           spawn: false // for grunt-contrib-watch v0.5.0+, "nospawn: true" for lower versions. Without this option specified express won't be reloaded 
         }
@@ -72,7 +68,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('test', ['jshint']);
 
-  grunt.registerTask('local', ['jshint', 'concat:local', 'express:dev', 'watch']);
+  grunt.registerTask('local', ['jshint', 'concat:build', 'express:dev', 'watch']);
 
   grunt.registerTask('build', ['jshint', 'concat:build', 'uglify']);
 

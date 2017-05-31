@@ -105161,6 +105161,8 @@ loadState.prototype.preload = function() {
   game.scale.PageAlignVertically = true;
 
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
+
+  game.load.image('background', 'assets/sprites/background.png');
   game.load.image('ground', 'assets/sprites/ground.png');
   game.load.image('whisps', 'assets/sprites/whisps.png');
   game.load.image('big_ice', 'assets/sprites/big_ice.png');
@@ -105220,6 +105222,7 @@ playState.prototype.create = function() {
 
   // map settings
   game.stage.backgroundColor = '#000080';
+  game.add.tileSprite(40, 40, 400, 600, 'background');
 
   // add player
   this.player = game.add.sprite(250, 250, 'character');

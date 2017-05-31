@@ -46,6 +46,7 @@ playState.prototype.create = function() {
 
   // map settings
   game.stage.backgroundColor = '#000080';
+  game.add.tileSprite(40, 40, 400, 600, 'background');
 
   // add player
   this.player = game.add.sprite(250, 250, 'character');
