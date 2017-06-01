@@ -105186,8 +105186,8 @@ var playState = function () {
   this.player = null;
   this.ground = null;
   this.yAxis = p2.vec2.fromValues(0, 1);
-  this.xSpeed = 150;
-  this.ySpeed = 660;
+  this.xSpeed = 125;
+  this.ySpeed = 400;
   this.shiftBoost = 260;
   this.jumpNumber = 0;
   this.timeOnGround = 0;
@@ -105257,7 +105257,7 @@ playState.prototype.create = function() {
   // player info
   this.player.frame = 0;
   this.player.name = 'player';
-  this.player.anchor.setTo(0.5, 0.3);
+  this.player.anchor.setTo(0.5, 0.55);
   this.player.body.fixedRotation = true;
 
   // player animations
@@ -105308,11 +105308,11 @@ playState.prototype.create = function() {
   this.wallSpriteContactMaterial = game.physics.p2.createContactMaterial(this.spriteMaterial, this.wallMaterial);
   
   // make the walls bouncy
-  this.wallSpriteContactMaterial.restitution = 0.9;
+  this.wallSpriteContactMaterial.restitution = 1.0;
   
   // places wall materials along the sides of the game world
-  // game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
-  game.physics.p2.setBoundsToWorld();
+  game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
+  // game.physics.p2.setBoundsToWorld();
 
   // register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -105381,13 +105381,13 @@ playState.prototype.update = function() {
 
   var cyc = this.updateCycle;
 
-  if ((cyc < 3000) && (cyc % 100 === 0)) {
+  if ((cyc < 3000) && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 1);
-  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 100 === 0)) {
+  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 2);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 2);
-  } else if ((cyc >= 6000)  && (cyc % 100 === 0)) {
+  } else if ((cyc >= 6000)  && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 3);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 3);
   }
@@ -105429,18 +105429,21 @@ playState.prototype.update = function() {
 
     if(this.timeDiff < 0.2) {
      
-      if(this.jumpNumber < 3) {
+      if((this.jumpNumber < 3) && (this.shiftKey.isDown)) {
         this.jumpNumber += 1; 
       } else {
-        this.jumpNumber = 3;
-        this.currentCombo += 1;
+        if((this.jumpNumber === 3) && (this.shiftKey.isDown)) {
+          this.jumpNumber = 3;
+          this.currentCombo += 1;
+        }
       }
-    
+    console.log(this.jumpNumber + ' ' + this.currentCombo);
+    console.log(this.timeDiff);
     } else {
 
       if(this.currentCombo > 0) {
         this.comboPoints = this.currentCombo * 1000;
-        this.wallSpriteContactMaterial.restitution = 0.9;
+        this.wallSpriteContactMaterial.restitution = 1.0;
         // console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
       }
 
@@ -105451,35 +105454,35 @@ playState.prototype.update = function() {
     switch(this.jumpNumber) {
       case 0:
         game.physics.p2.gravity.y = 1500;
-        this.ySpeed = 550;
-        this.xSpeed = 150;
+        this.ySpeed = 450;
+        this.xSpeed = 125;
         this.player.scale.setTo(0.6, 0.6);
-        this.player.anchor.setTo(0.5, 0.3);
+        this.player.anchor.setTo(0.5, 0.55);
         this.player.body.fixedRotation = true;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
-        this.ySpeed = 575;   
+        this.ySpeed = 475;   
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
-        this.ySpeed = 600;
+        this.ySpeed = 500;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
-        this.ySpeed = 670;
+        this.ySpeed = 570;
         this.xSpeed = 300;
-        game.physics.p2.gravity.y = 1000;
+        game.physics.p2.gravity.y = 1250;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
-        this.wallSpriteContactMaterial.restitution = 1.05;
+        this.wallSpriteContactMaterial.restitution = 1.15;
 
-        this.player.anchor.setTo(0.5, 0.65);
-        this.player.body.fixedRotation = false;
         this.player.scale.setTo(1, 1);
+        this.player.anchor.setTo(0.5, 0.65);
+        this.player.body.fixedRotation = true;
     }
     this.player.body.moveUp(this.ySpeed);
   
@@ -105534,7 +105537,12 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   var randomXAxis = ((Math.random() * game.world.bounds.width) + 1);
 
-  var randWidthScale = Math.floor(((Math.random() * 3) + 1));
+  if (randomXAxis < 100) {
+    randomXAxis += 100;
+  } else if (randomXAxis > 320) {
+    randomXAxis -= 100;
+  }
+  console.log(randomXAxis);
 
   var randomLevelSegmentChoice = Math.floor(((Math.random() * 3) + 1));
 
@@ -105548,13 +105556,13 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   switch(levelChoice) {
     case 'big_ice':
-      platform.scale.setTo(randWidthScale, 0.3);
+      platform.scale.setTo(0.5, 0.15);
       break;
     case 'med_ice':
-      platform.scale.setTo(randWidthScale, 0.3);
+      platform.scale.setTo(1, 0.15);
       break;
     case 'small_ice':
-      platform.scale.setTo(randWidthScale, 0.3);
+      platform.scale.setTo(1, 0.15);
       break;
     default:
   }
