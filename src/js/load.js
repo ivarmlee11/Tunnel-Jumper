@@ -12,6 +12,7 @@ loadState.prototype.preload = function() {
 
   game.load.image('background', 'assets/sprites/background.png');
   game.load.image('dust', 'assets/sprites/dust.png');
+  game.load.image('controls', 'assets/sprites/controls.png');
   game.load.image('charge0', 'assets/sprites/charge0.png');
   game.load.image('charge1', 'assets/sprites/charge1.png');
   game.load.image('charge2', 'assets/sprites/charge2.png');

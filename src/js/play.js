@@ -154,16 +154,30 @@ playState.prototype.create = function() {
   this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'Combo', {font: '12px Courier', fill: '#ffffff'});
   this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
 
-
-  
   this.pauseLabel.inputEnabled = true;
   this.pauseLabel.events.onInputUp.add(function () {
     // When the paus button is pressed, we pause the game
     game.paused = !game.paused;
     if(game.paused) {
-      this.pauseLabel.setText('Unpause');   
+      this.pauseLabel.setText('Unpause');
+      this.controlImage = game.add.image(88, 90, 'controls');
+      this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Courier', fill: '#000000'});
+      this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Courier', fill: '#000000'});
+      this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Courier', fill: '#000000'});
+      this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Courier', fill: '#000000'});
+      this.arrowInts1 = game.add.text(163, 250, 'LEFT DOWN RIGHT', {font: '12px Courier', fill: '#000000'});
+      this.arrowInts2 = game.add.text(141, 320, 'DROP THROUGH PLATFORMS', {font: '12px Courier', fill: '#000000'});
+      this.arrowInts3 = game.add.text(208, 310, '^', {font: '25px Courier', fill: '#000000'});
     } else {
       this.pauseLabel.setText('Pause');
+      this.shiftInts1.destroy();
+      this.shiftInts2.destroy();
+      this.spaceInts1.destroy();
+      this.spaceInts2.destroy();
+      this.arrowInts1.destroy();
+      this.arrowInts2.destroy();
+      this.arrowInts3.destroy();
+      this.controlImage.destroy();
     }
   }.bind(this));
 
@@ -259,20 +273,24 @@ playState.prototype.update = function() {
         this.player.scale.setTo(0.6, 0.6);
         this.player.anchor.setTo(0.5, 0.3);
         this.player.body.fixedRotation = true;
+        this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
-        this.ySpeed = 575;
+        this.ySpeed = 575;   
+        this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
         this.ySpeed = 600;
+        this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
         this.ySpeed = 670;
         this.xSpeed = 300;
         game.physics.p2.gravity.y = 1000;
+        this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
         this.wallSpriteContactMaterial.restitution = 1.05;
 
