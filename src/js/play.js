@@ -4,7 +4,7 @@ var playState = function () {
   this.ground = null;
   this.yAxis = p2.vec2.fromValues(0, 1);
   this.xSpeed = 125;
-  this.ySpeed = 400;
+  this.ySpeed = 600;
   this.shiftBoost = 260;
   this.jumpNumber = 0;
   this.timeOnGround = 0;
@@ -54,8 +54,11 @@ playState.prototype.create = function() {
   // game physics
   game.physics.startSystem(Phaser.Physics.P2JS);
 
+  // game contact physics 
+  game.physics.p2.world.on('preSolve', onPresolve);
+
   // gravity + friction
-  game.physics.p2.gravity.y = 1500;
+  game.physics.p2.gravity.y = 1222;
   game.physics.p2.friction = 0.5;
   game.paused = false;
 
@@ -74,8 +77,10 @@ playState.prototype.create = function() {
   // player info
   this.player.frame = 0;
   this.player.name = 'player';
-  this.player.anchor.setTo(0.5, 0.55);
+  this.player.scale.setTo(0.6, 0.6);
+  this.player.anchor.setTo(0.5, 0.4);
   this.player.body.fixedRotation = true;
+  this.player.body.setCircle(15,0,0);
 
   // player animations
   // this.player.animations.add('wait', [35, 36], 1, true); 
@@ -84,28 +89,6 @@ playState.prototype.create = function() {
 
   // add player to game
   game.add.existing(this.player);
-  this.player.scale.setTo(0.6, 0.6);
-
-  // add some dimensions and sensors to the player
-  this.playerShape = this.player.body.setCircle(10, 0, 0);              // the main collision shape  (radius,offsetX,offsetY)
-
-  this.playerSensorTop = this.player.body.addRectangle(10, 10, 0, -20);  // upper sensor shape  (width,height,offsetX,offsetY)
-  
-  this.playerSensorTop.sensor = true;
-  
-  this.playerSensorBottom = this.player.body.addRectangle(10, 10, 0, 20);
-  
-  this.playerSensorBottom.sensor = true;
-
-  this.playerSensorRight = this.player.body.addRectangle(10, 10, -20, 0);
-
-  this.playerSensorRight.sensor = true;
-
-  this.playerSensorLeft = this.player.body.addRectangle(10, 10, 20, 0);
-
-  this.playerSensorLeft.sensor = true;
-
-  this.player.body.onBeginContact.add(checkSensors, this);
 
   // add ground so the player doesn't bouce around on the world border on game start
   this.ground = game.add.sprite(0, game.world.bounds.height - 100, 'ground'); 
@@ -129,6 +112,7 @@ playState.prototype.create = function() {
   
   // places wall materials along the sides of the game world
   game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
+
   // game.physics.p2.setBoundsToWorld();
 
   // register keys I want to use
@@ -156,7 +140,7 @@ playState.prototype.create = function() {
 
   this.pauseLabel.inputEnabled = true;
   this.pauseLabel.events.onInputUp.add(function () {
-    // When the paus button is pressed, we pause the game
+  // When the paus button is pressed, we pause the game
     game.paused = !game.paused;
     if(game.paused) {
       this.pauseLabel.setText('Unpause');
@@ -198,13 +182,13 @@ playState.prototype.update = function() {
 
   var cyc = this.updateCycle;
 
-  if ((cyc < 3000) && (cyc % 60 === 0)) {
+  if ((cyc < 3000) && (cyc % 115 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 1);
-  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 60 === 0)) {
+  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 115 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 2);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 2);
-  } else if ((cyc >= 6000)  && (cyc % 60 === 0)) {
+  } else if ((cyc >= 6000)  && (cyc % 115 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 3);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 3);
   }
@@ -250,12 +234,12 @@ playState.prototype.update = function() {
         this.jumpNumber += 1; 
       } else {
         if((this.jumpNumber === 3) && (this.shiftKey.isDown)) {
+
           this.jumpNumber = 3;
           this.currentCombo += 1;
         }
       }
-    console.log(this.jumpNumber + ' ' + this.currentCombo);
-    console.log(this.timeDiff);
+
     } else {
 
       if(this.currentCombo > 0) {
@@ -263,7 +247,7 @@ playState.prototype.update = function() {
         this.wallSpriteContactMaterial.restitution = 1.0;
         // console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
       }
-
+      
       this.currentCombo = 0;
       this.jumpNumber = 0;
     }
@@ -271,43 +255,35 @@ playState.prototype.update = function() {
     switch(this.jumpNumber) {
       case 0:
         game.physics.p2.gravity.y = 1500;
-        this.ySpeed = 450;
+        this.ySpeed = 600;
         this.xSpeed = 125;
-        this.player.scale.setTo(0.6, 0.6);
-        this.player.anchor.setTo(0.5, 0.55);
         this.player.body.fixedRotation = true;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
-        this.ySpeed = 475;   
+        this.ySpeed = 625;   
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
-        this.ySpeed = 500;
+        this.ySpeed = 650;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
-        this.ySpeed = 570;
-        this.xSpeed = 300;
-        game.physics.p2.gravity.y = 1250;
+        this.ySpeed = 675;
+        this.xSpeed = 200;
+        game.physics.p2.gravity.y = 999;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
         this.wallSpriteContactMaterial.restitution = 1.15;
-
-        this.player.scale.setTo(1, 1);
-        this.player.anchor.setTo(0.5, 0.65);
-        this.player.body.fixedRotation = true;
     }
     this.player.body.moveUp(this.ySpeed);
   
   }
 
   if ((this.downKey.isDown) && (this.player.body.x > 20) && (this.player.body.x < (game.world.bounds.width - 20)) && (this.updateCycle > 750) && (playerOnGround.call(this, this.yAxis))) {
-    game.physics.p2.friction = 0.1;
-    this.playerShape.sensor = true;
     game.physics.p2.friction = 0.5;
   }
   
@@ -359,7 +335,7 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
   } else if (randomXAxis > 320) {
     randomXAxis -= 100;
   }
-  console.log(randomXAxis);
+  // console.log(randomXAxis);
 
   var randomLevelSegmentChoice = Math.floor(((Math.random() * 3) + 1));
 
@@ -369,39 +345,19 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   // console.log(levelChoice, ' level choice');
 
-  var platform = platformGroup.create(randomXAxis, -90, levelChoice);
+  var platform = platformGroup.create(randomXAxis, -170, levelChoice);
 
-  switch(levelChoice) {
-    case 'big_ice':
-      platform.scale.setTo(0.5, 0.15);
-      break;
-    case 'med_ice':
-      platform.scale.setTo(1, 0.15);
-      break;
-    case 'small_ice':
-      platform.scale.setTo(1, 0.15);
-      break;
-    default:
-  }
   platform.name = 'platform';                      
   game.physics.p2.enable(platform, true);                     
-  platform.body.kinematic = true;                              
+  platform.body.kinematic = true;                          
   platform.velo = this.platformVelo;  
-}
-
-function checkSensors(bodyA, shapeA, shapeB, contactEquation) {
-  if (bodyA && bodyA.sprite && bodyA.sprite.name === 'platform' && (shapeB === this.playerSensorTop)) {
-    this.playerShape.sensor = true;
-  }
-
-  if (shapeB === this.playerSensorBottom) {
-    this.playerShape.sensor = false;
-  }
+  
+  platform.scale.setTo(1, 1);
 
 }
 
 function movePlatforms(platform) {
-  platform.body.velocity.y += 0.094;
+  platform.body.velocity.y += 0.074;
 
   if (platform.body.y > game.world.bounds.height + 20) {
     platform.destroy();
@@ -415,6 +371,26 @@ function moveGround() {
   setTimeout(function() {
     ground.destroy();
   }, 2000);
+}
+
+function onPresolve(presolve){
+  if (presolve.contactEquations[0]) {
+    c = presolve.contactEquations[0];
+    f = presolve.frictionEquations[0];
+
+    var yAxis = p2.vec2.fromValues(0, 1);
+    var y = p2.vec2.dot(c.normalA, yAxis);
+    console.log(y);
+    if (c.bodyB.parent.sprite && c.bodyB.parent.sprite.name == 'platform' && y >= 0) {  //if moving upwards
+      console.log(c.bodyB.parent.sprite.name);
+      // console.log(presolve);
+      c.enabled = false;   //disable contactEquation
+      f.enabled = false;   //disable frictionEquation (solves the stuckInPlatform problem)
+      if (c.bodyA.parent.velocity.destination[1] < 15 ) { // velocity < 15 - still inside the platform
+        c.bodyA.parent.velocity.destination[1]-=0.5;     // course correction!
+      } 
+    }
+  }
 }
 
 
