@@ -1,7 +1,9 @@
 var loadState = function () {};
 
 loadState.prototype.preload = function() {
-  var loadingLabel = game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#ffffff'});
+  var loadingBar = this.add.sprite(game.world.bounds.width - 90, game.world.bounds.height/2, 'loading');
+  loadingBar.anchor.setTo(0.5,0.5);
+  this.load.setPreloadSprite(loadingBar);
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.pageAlignHorizontally = true;

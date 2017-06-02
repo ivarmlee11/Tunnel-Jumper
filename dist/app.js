@@ -105144,17 +105144,47 @@ PIXI.TextureSilentFail = true;
 
 var bootState =  function() {};
 
+bootState.prototype.preload = function()  {
+  game.load.image('loading','assets/sprites/loading.png'); 
+};
+
 bootState.prototype.create = function() {
-  // game.physics.startSystem(Phaser.Physics.ARCADE);
   game.physics.startSystem(Phaser.Physics.P2JS);
   game.state.start('load');
 };
 
 
+var gameOverState =  function() {};
+
+gameOverState.prototype.preload = function()  {
+};
+
+gameOverState.prototype.create = function() {
+  var finalScore = game.state.states.gameover.states;
+  console.log('in game over state');
+
+    // game.add.text((game.world.bounds.width/2) - 30, game.world.bounds.height - 400, finalScore, {font: '32px Space Mono', fill: '#ffffff'});
+
+  // this.restartGame = game.add.text((game.world.bounds.width/2) - 80, game.world.bounds.height - 300, 'Hit enter or click here to restart.', {font: '12px Space Mono', fill: '#ffffff'});
+
+  // this.restartGame.inputEnabled = true;
+  // this.restartGame.events.onInputUp.add(function() {
+  //   game.state.start('play'); 
+  // });
+
+  // if (this.enterKey.isDown) {
+  //   game.state.start('play');
+  // }
+
+  // game.paused = true;
+};
+
 var loadState = function () {};
 
 loadState.prototype.preload = function() {
-  var loadingLabel = game.add.text(80, 150, 'loading...', {font: '30px Courier', fill: '#ffffff'});
+  var loadingBar = this.add.sprite(game.world.bounds.width - 90, game.world.bounds.height/2, 'loading');
+  loadingBar.anchor.setTo(0.5,0.5);
+  this.load.setPreloadSprite(loadingBar);
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.pageAlignHorizontally = true;
@@ -105182,7 +105212,7 @@ loadState.prototype.create = function() {
 };
 
 var playState = function () {
-  this.playerMessage = null;
+  this.finalScore = null;
   this.player = null;
   this.ground = null;
   this.yAxis = p2.vec2.fromValues(0, 1);
@@ -105296,7 +105326,8 @@ playState.prototype.create = function() {
   // places wall materials along the sides of the game world
   game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
 
-  // game.physics.p2.setBoundsToWorld();
+  // make the floor and ceiling endless
+  game.physics.p2.setBoundsToWorld(true, true, false, false);
 
   // register keys I want to use
   this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
@@ -105304,21 +105335,22 @@ playState.prototype.create = function() {
   this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
   this.shiftKey = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
   this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+  this.enterKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
   // stop the following keys from propagating up to the browser
-  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.SHIFT, Phaser.Keyboard.DOWN ]);
+  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.SHIFT, Phaser.Keyboard.DOWN, Phaser.Keyboard.ENTER ]);
 
   // points
-  this.pointsLabel = game.add.text(100, game.world.bounds.height - 135, 'Points', {font: '12px Courier', fill: '#ffffff'});
+  this.pointsLabel = game.add.text(100, game.world.bounds.height - 135, 'Points', {font: '12px Space Mono', fill: '#ffffff'});
   
   // points to set
-  this.pointsSetLabel = game.add.text(149, game.world.bounds.height - 135, '0', {font: '12px Courier', fill: '#ffffff'});
+  this.pointsSetLabel = game.add.text(149, game.world.bounds.height - 135, '0', {font: '12px Space Mono', fill: '#ffffff'});
 
   // pause
-  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'Pause', {font: '12px Courier', fill: '#ffffff'});
+  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'Pause', {font: '12px Space Mono', fill: '#ffffff'});
 
   // combo indicator
-  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'Combo', {font: '12px Courier', fill: '#ffffff'});
+  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'Combo', {font: '12px Space Mono', fill: '#ffffff'});
   this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
 
   this.pauseLabel.inputEnabled = true;
@@ -105328,13 +105360,16 @@ playState.prototype.create = function() {
     if(game.paused) {
       this.pauseLabel.setText('Unpause');
       this.controlImage = game.add.image(88, 90, 'controls');
-      this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Courier', fill: '#000000'});
-      this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Courier', fill: '#000000'});
-      this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Courier', fill: '#000000'});
-      this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Courier', fill: '#000000'});
-      this.arrowInts1 = game.add.text(163, 250, 'LEFT DOWN RIGHT', {font: '12px Courier', fill: '#000000'});
-      this.arrowInts2 = game.add.text(141, 320, 'DROP THROUGH PLATFORMS', {font: '12px Courier', fill: '#000000'});
-      this.arrowInts3 = game.add.text(208, 310, '^', {font: '25px Courier', fill: '#000000'});
+      this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
+      this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
+      this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
+      this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts1 = game.add.text(163, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts2 = game.add.text(182, 315, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts3 = game.add.text(210, 301, '^', {font: '25px Space Mono', fill: '#000000'});
+      this.arrowInts4 = game.add.text(211, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
+      this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts6 = game.add.text(260, 279, '►', {font: '10px Space Mono', fill: '#000000'});
     } else {
       this.pauseLabel.setText('Pause');
       this.shiftInts1.destroy();
@@ -105344,6 +105379,9 @@ playState.prototype.create = function() {
       this.arrowInts1.destroy();
       this.arrowInts2.destroy();
       this.arrowInts3.destroy();
+      this.arrowInts4.destroy();
+      this.arrowInts5.destroy();
+      this.arrowInts6.destroy();
       this.controlImage.destroy();
     }
   }.bind(this));
@@ -105351,6 +105389,11 @@ playState.prototype.create = function() {
 };
 
 playState.prototype.update = function() {
+  // console.log(this.player.position.y);
+  // console.log(game.world.bounds.height + 200);
+  if(this.player.position.y > game.world.bounds.height + 50) {
+    endGame.call(this);
+  }
 
   this.timeOnGround += 0.01;
 
@@ -105563,34 +105606,93 @@ function onPresolve(presolve){
 
     var yAxis = p2.vec2.fromValues(0, 1);
     var y = p2.vec2.dot(c.normalA, yAxis);
-    console.log(y);
-    if (c.bodyB.parent.sprite && c.bodyB.parent.sprite.name == 'platform' && y >= 0) {  //if moving upwards
-      console.log(c.bodyB.parent.sprite.name);
-      // console.log(presolve);
+
+    if (c.bodyB.parent.sprite && c.bodyB.parent.sprite.name == 'platform' && y >= 0){  //if moving upwards
       c.enabled = false;   //disable contactEquation
       f.enabled = false;   //disable frictionEquation (solves the stuckInPlatform problem)
       if (c.bodyA.parent.velocity.destination[1] < 15 ) { // velocity < 15 - still inside the platform
-        c.bodyA.parent.velocity.destination[1]-=0.5;     // course correction!
+        c.bodyA.parent.velocity.destination[1]-=0.5;      // course correction!
       } 
     }
   }
 }
 
+function endGame() {
+  var finalScore = this.points.total;
+
+  this.finalScore = finalScore;
+
+  game.state.states.gameover.states = finalScore;
+
+  game.state.start('gameover');
+
+}
 
 
-var titleState = function() {};
+var titleState = function() {
+  this.instructionsShowing = false;
+};
 
 titleState.prototype.create = function() {
-  // var nameLabel = game.add.text(160, 80, "Click anywhere to start", {
-  //   font: '14px Space Mono', fill: '#ffffff'
-  // });
-  // game.input.activePointer.capture = true;
-  game.state.start('play'); 
+  game.input.activePointer.capture = true;
+  
+  this.nameLabel = game.add.text((game.world.bounds.width/2) - 90, game.world.bounds.height/2, "TUNNEL JUMPER", {
+    font: '24px Space Mono', fill: '#ffffff'
+  });
+
+  this.playLabel = game.add.text((game.world.bounds.width/2) - 15, game.world.bounds.height - 150, "START", {
+    font: '12px Space Mono', fill: '#ffffff'
+  });
+
+  this.playLabel.inputEnabled = true;
+  this.playLabel.events.onInputUp.add(startGame);
+
+  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 38, game.world.bounds.height - 40, "INSTRUCTIONS", {
+    font: '12px Space Mono', fill: '#ffffff'
+  });
+
+  this.instructionsLabel.inputEnabled = true;
+  this.instructionsLabel.events.onInputUp.add(toggleInstructions.bind(this));
+  
 };
 
 titleState.prototype.update = function() {
 
 };
+
+function startGame() {
+  game.state.start('play'); 
+}
+
+function toggleInstructions() {
+  if(!this.instructionsShowing) {
+    this.instructionsShowing = true;
+    this.controlImage = game.add.image(88, 90, 'controls');
+    this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
+    this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
+    this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
+    this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts1 = game.add.text(163, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts2 = game.add.text(182, 315, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts3 = game.add.text(210, 301, '^', {font: '25px Space Mono', fill: '#000000'});
+    this.arrowInts4 = game.add.text(211, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
+    this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts6 = game.add.text(260, 279, '►', {font: '10px Space Mono', fill: '#000000'});
+  } else {
+    this.instructionsShowing = false;
+    this.shiftInts1.destroy();
+    this.shiftInts2.destroy();
+    this.spaceInts1.destroy();
+    this.spaceInts2.destroy();
+    this.arrowInts1.destroy();
+    this.arrowInts2.destroy();
+    this.arrowInts3.destroy();
+    this.arrowInts4.destroy();
+    this.arrowInts5.destroy();
+    this.arrowInts6.destroy();
+    this.controlImage.destroy();
+  }
+}
 var game = new Phaser.Game(420, 420, Phaser.AUTO, null, 'gameDiv');
 // game states
 
@@ -105598,6 +105700,7 @@ game.state.add('boot', bootState);
 game.state.add('load', loadState);
 game.state.add('title', titleState);
 game.state.add('play', playState);
+game.state.add('gameover', gameOverState);
 
 // call boot state
 
