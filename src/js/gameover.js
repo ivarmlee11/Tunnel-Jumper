@@ -1,21 +1,13 @@
 var gameOverState =  function() {
   this.finalScoreToFireBase = null;
-  this.restartGame = null;
-  this.inputValue = 'test';
-  this.input = null;
-  this.instructions = null;
-};
-
-gameOverState.prototype.preload = function()  {
 };
 
 gameOverState.prototype.create = function() {
   game.add.plugin(PhaserInput.Plugin);
 
-  this.enterKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+  // this.enterKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
 
-  // stop the following keys from propagating up to the browser
-  game.input.keyboard.addKeyCapture([ Phaser.Keyboard.ENTER ]);
+  // game.input.keyboard.addKeyCapture([ Phaser.Keyboard.ENTER ]);
 
   this.finalScoreToFireBase = game.state.states.gameover.states;
 
@@ -37,10 +29,10 @@ gameOverState.prototype.displayTopTen = function(newId) {
   var listNumber = 1;
   var listSpacing = 15;
 
-  var namesAndScores = [];
-
   game.add.image((game.world.bounds.width/2) - 39, (game.world.bounds.height/2) - 200, 'topScoreBackground');
   game.add.text((game.world.bounds.width/2) - 4, (game.world.bounds.height/2) - 198, 'TOP TEN', {font: '12px Space Mono', fill: '#000000'});
+
+  var namesAndScores = [];
 
   fireBase.orderByChild('score').limitToLast(10).once('value', function(snapshot) {
     snapshot.forEach(function(childSnapshot) {
@@ -71,10 +63,7 @@ gameOverState.prototype.displayTopTen = function(newId) {
 
 function saveToFireBase(score) {
 
-  var checkTopTen = [];
-
   var fireBase = firebase.database().ref();
-
   var finalScore = score;
 
   var pushRef = fireBase.push({
@@ -84,6 +73,8 @@ function saveToFireBase(score) {
 
   var newId = pushRef.getKey();
 
+  var checkTopTen = [];
+  
   fireBase.orderByChild('score').limitToLast(11).once('value', function(snapshot) {
     var snap = snapshot;
     snap.forEach(function(childSnapshot) {
@@ -131,8 +122,6 @@ function saveToFireBase(score) {
 function checkIfSwear(word) {
 
   var isItaSwear = false;
-
-  // console.log('checking swears');
 
   var swears = [
     'ass',

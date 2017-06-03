@@ -12,10 +12,6 @@ var playState = function () {
   this.landed = null;
   this.playerOnGround = null;
   this.movingPlatforms = null;
-  this.playerSensorBottom = null;
-  this.playerSensorTop = null;
-  this.playerSensorLeft = null;
-  this.playerSensorRight = null;
   this.playerShape = null;
   this.platformVelo = 0.05;
   this.platformInterval = 1.5;  
@@ -171,7 +167,6 @@ playState.prototype.create = function() {
 };
 
 playState.prototype.calcPoints = function() {
-  // console.log('calc');
   var allPoints = this.updateCycle + this.comboPoints;
   this.totalPoints = allPoints;
 };

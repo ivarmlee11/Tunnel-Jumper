@@ -16,7 +16,7 @@ titleState.prototype.create = function() {
   this.playLabel.inputEnabled = true;
   this.playLabel.events.onInputUp.add(startGame);
 
-  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 36, game.world.bounds.height - 40, "INSTRUCTIONS", {
+  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 39, game.world.bounds.height - 40, "INSTRUCTIONS", {
     font: '12px Space Mono', fill: '#ffffff'
   });
 
