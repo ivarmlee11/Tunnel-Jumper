@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         separator: '\n'
       },
       build: {
-        src: ['src/js/vendor/unmin/phaser.js', 'src/js/*.js', 'src/js/start/*.js'],
+        src: ['src/js/vendor/unmin/phaser.js', 'src/js/vendor/phaser-input/phaserInput.js', 'src/js/firebase/firebase.js', 'src/js/*.js', 'src/js/start/game.js'],
         dest: 'dist/app.js',
       }
     },
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
       files: ['test/**/*.html']
     },
     jshint: {
-      files: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js'],
+      files: ['Gruntfile.js', 'src/js/**/*.js', 'test/**/*.js'],
       options: {
         // options here to override JSHint defaults
         globals: {

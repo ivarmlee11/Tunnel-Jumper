@@ -4,7 +4,7 @@ var playState = function () {
   this.ground = null;
   this.yAxis = p2.vec2.fromValues(0, 1);
   this.xSpeed = 125;
-  this.ySpeed = 600;
+  this.ySpeed = 525;
   this.shiftBoost = 260;
   this.jumpNumber = 0;
   this.timeOnGround = 0;
@@ -22,14 +22,8 @@ var playState = function () {
   this.updateCycle = 1;
   this.comboPoints = 0;
   this.currentCombo = 0;
-  this.points = {
-    calcPoints: function(updateCycle, comboPoints) {
-      var allPoints = updateCycle + comboPoints;
-      this.points.total = allPoints;
-      return allPoints;
-    }.bind(this),
-    total: 0
-  };
+  this.totalPoints = 0;
+
   this.levels = {
     1: {
       1: "big_ice",
@@ -47,6 +41,7 @@ var playState = function () {
       3: "small_ice"
     }
   };
+
 };
 
 playState.prototype.create = function() {
@@ -80,7 +75,7 @@ playState.prototype.create = function() {
   this.player.scale.setTo(0.6, 0.6);
   this.player.anchor.setTo(0.5, 0.4);
   this.player.body.fixedRotation = true;
-  this.player.body.setCircle(15,0,0);
+  this.player.body.setCircle(10,0,0);
 
   // player animations
   // this.player.animations.add('wait', [35, 36], 1, true); 
@@ -107,8 +102,8 @@ playState.prototype.create = function() {
   // describes behavior when these two materials come into contact
   this.wallSpriteContactMaterial = game.physics.p2.createContactMaterial(this.spriteMaterial, this.wallMaterial);
   
-  // make the walls bouncy
-  this.wallSpriteContactMaterial.restitution = 1.0;
+  // set wall bounce
+  this.wallSpriteContactMaterial.restitution = 0.3;
   
   // places wall materials along the sides of the game world
   game.physics.p2.setWorldMaterial(this.wallMaterial, true, true, false, false);
@@ -128,16 +123,16 @@ playState.prototype.create = function() {
   game.input.keyboard.addKeyCapture([ Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT, Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.SHIFT, Phaser.Keyboard.DOWN, Phaser.Keyboard.ENTER ]);
 
   // points
-  this.pointsLabel = game.add.text(100, game.world.bounds.height - 135, 'Points', {font: '12px Space Mono', fill: '#ffffff'});
+  this.pointsLabel = game.add.text(100, game.world.bounds.height - 135, 'POINTS', {font: '12px Space Mono', fill: '#ffffff'});
   
   // points to set
   this.pointsSetLabel = game.add.text(149, game.world.bounds.height - 135, '0', {font: '12px Space Mono', fill: '#ffffff'});
 
   // pause
-  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'Pause', {font: '12px Space Mono', fill: '#ffffff'});
+  this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'PAUSE', {font: '12px Space Mono', fill: '#ffffff'});
 
   // combo indicator
-  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'Combo', {font: '12px Space Mono', fill: '#ffffff'});
+  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'COMBO', {font: '12px Space Mono', fill: '#ffffff'});
   this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
 
   this.pauseLabel.inputEnabled = true;
@@ -145,7 +140,7 @@ playState.prototype.create = function() {
   // When the paus button is pressed, we pause the game
     game.paused = !game.paused;
     if(game.paused) {
-      this.pauseLabel.setText('Unpause');
+      this.pauseLabel.setText('UNPAUSE');
       this.controlImage = game.add.image(88, 90, 'controls');
       this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
       this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
@@ -158,7 +153,7 @@ playState.prototype.create = function() {
       this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
       this.arrowInts6 = game.add.text(260, 279, '►', {font: '10px Space Mono', fill: '#000000'});
     } else {
-      this.pauseLabel.setText('Pause');
+      this.pauseLabel.setText('PAUSE');
       this.shiftInts1.destroy();
       this.shiftInts2.destroy();
       this.spaceInts1.destroy();
@@ -175,9 +170,16 @@ playState.prototype.create = function() {
 
 };
 
+playState.prototype.calcPoints = function() {
+  // console.log('calc');
+  var allPoints = this.updateCycle + this.comboPoints;
+  this.totalPoints = allPoints;
+};
+
 playState.prototype.update = function() {
-  // console.log(this.player.position.y);
-  // console.log(game.world.bounds.height + 200);
+
+  game.physics.p2.friction = 0.5;
+  
   if(this.player.position.y > game.world.bounds.height + 50) {
     endGame.call(this);
   }
@@ -195,13 +197,13 @@ playState.prototype.update = function() {
 
   var cyc = this.updateCycle;
 
-  if ((cyc < 3000) && (cyc % 115 === 0)) {
+  if ((cyc < 3000) && (cyc % 90 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 1);
-  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 115 === 0)) {
+  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 90 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 2);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 2);
-  } else if ((cyc >= 6000)  && (cyc % 115 === 0)) {
+  } else if ((cyc >= 6000)  && (cyc % 90 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 3);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 3);
   }
@@ -241,7 +243,7 @@ playState.prototype.update = function() {
 
     this.timeDiff = this.liftOff - this.landed;
 
-    if(this.timeDiff < 0.2) {
+    if((this.timeDiff < 0.2) && (this.shiftKey.isDown)) {
      
       if((this.jumpNumber < 3) && (this.shiftKey.isDown)) {
         this.jumpNumber += 1; 
@@ -256,55 +258,53 @@ playState.prototype.update = function() {
     } else {
 
       if(this.currentCombo > 0) {
-        this.comboPoints = this.currentCombo * 1000;
-        this.wallSpriteContactMaterial.restitution = 1.0;
-        // console.log('Your combo just ended! You got ', this.currentCombo, ' special jumps in a row for ', this.comboPoints, ' points!');
+        this.comboPoints += this.currentCombo * 1000;
+        this.wallSpriteContactMaterial.restitution = 0.3;
       }
       
       this.currentCombo = 0;
       this.jumpNumber = 0;
     }
-    // console.log(this.jumpNumber, ' jump number');
     switch(this.jumpNumber) {
       case 0:
         game.physics.p2.gravity.y = 1500;
-        this.ySpeed = 600;
+        this.ySpeed = 525;
         this.xSpeed = 125;
         this.player.body.fixedRotation = true;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
-        this.ySpeed = 625;   
+        this.ySpeed = 550;   
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
-        this.ySpeed = 650;
+        this.ySpeed = 575;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
-        this.ySpeed = 675;
-        this.xSpeed = 200;
-        game.physics.p2.gravity.y = 999;
+        this.ySpeed = 600;
+        this.xSpeed = 300;
+        game.physics.p2.gravity.y = 1050;
         this.comboIndicator.destroy();
         this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
-        this.wallSpriteContactMaterial.restitution = 1.15;
+        this.wallSpriteContactMaterial.restitution = 0.65;
     }
     this.player.body.moveUp(this.ySpeed);
   
   }
 
   if ((this.downKey.isDown) && (this.player.body.x > 20) && (this.player.body.x < (game.world.bounds.width - 20)) && (this.updateCycle > 750) && (playerOnGround.call(this, this.yAxis))) {
-    game.physics.p2.friction = 0.5;
+    game.physics.p2.friction = 10;
   }
   
   this.movingPlatforms.forEach(movePlatforms, this);
 
-  this.points.calcPoints(this.updateCycle, this.comboPoints);
+  playState.prototype.calcPoints.call(this);
 
-  this.pointsSetLabel.setText(this.points.total);
+  this.pointsSetLabel.setText(this.totalPoints);
 };
 
 function playerOnGround(yAxis) {
@@ -405,11 +405,10 @@ function onPresolve(presolve){
 }
 
 function endGame() {
-  var finalScore = this.points.total;
 
-  this.finalScore = finalScore;
+  this.finalScore = this.totalPoints;
 
-  game.state.states.gameover.states = finalScore;
+  game.state.states.gameover.states = this.finalScore;
 
   game.state.start('gameover');
 

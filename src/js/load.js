@@ -1,7 +1,7 @@
 var loadState = function () {};
 
 loadState.prototype.preload = function() {
-  var loadingBar = this.add.sprite(game.world.bounds.width - 90, game.world.bounds.height/2, 'loading');
+  var loadingBar = this.add.sprite((game.world.bounds.width/2) + 10, game.world.bounds.height/2, 'loading');
   loadingBar.anchor.setTo(0.5,0.5);
   this.load.setPreloadSprite(loadingBar);
 
@@ -13,6 +13,7 @@ loadState.prototype.preload = function() {
   game.load.spritesheet('character', 'assets/sprites/character.png', 48, 48);
 
   game.load.image('background', 'assets/sprites/background.png');
+  game.load.image('topScoreBackground', 'assets/sprites/topScoreBackground.png');
   game.load.image('dust', 'assets/sprites/dust.png');
   game.load.image('controls', 'assets/sprites/controls.png');
   game.load.image('charge0', 'assets/sprites/charge0.png');

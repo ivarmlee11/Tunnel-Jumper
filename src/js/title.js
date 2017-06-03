@@ -3,7 +3,7 @@ var titleState = function() {
 };
 
 titleState.prototype.create = function() {
-  game.input.activePointer.capture = true;
+  game.input.activePointer.capture = true; 
   
   this.nameLabel = game.add.text((game.world.bounds.width/2) - 90, game.world.bounds.height/2, "TUNNEL JUMPER", {
     font: '24px Space Mono', fill: '#ffffff'
@@ -15,14 +15,15 @@ titleState.prototype.create = function() {
 
   this.playLabel.inputEnabled = true;
   this.playLabel.events.onInputUp.add(startGame);
+  startGame();
 
-  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 38, game.world.bounds.height - 40, "INSTRUCTIONS", {
+  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 36, game.world.bounds.height - 40, "INSTRUCTIONS", {
     font: '12px Space Mono', fill: '#ffffff'
   });
 
   this.instructionsLabel.inputEnabled = true;
   this.instructionsLabel.events.onInputUp.add(toggleInstructions.bind(this));
-  
+
 };
 
 titleState.prototype.update = function() {
@@ -42,7 +43,7 @@ function toggleInstructions() {
     this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
     this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
     this.arrowInts1 = game.add.text(163, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
-    this.arrowInts2 = game.add.text(182, 315, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts2 = game.add.text(182, 320, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
     this.arrowInts3 = game.add.text(210, 301, '^', {font: '25px Space Mono', fill: '#000000'});
     this.arrowInts4 = game.add.text(211, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
     this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
