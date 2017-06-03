@@ -125,7 +125,27 @@ function checkIfSwear(word) {
 
   var swears = [
     'ass',
+    'âss',
+    'åss',
+    'àss',
+    'äss',
+    'azz',
+    'âzz',
+    'åzz',
+    'àzz',
+    'äzz',
     '   ',
+    'âšš',
+    'åšš',
+    'àšš',
+    'äšš',
+    'ašš',
+    'ašs',
+    'asš',
+    'fâg',
+    'fåg',
+    'fàg',
+    'fäg',
     'fuc',
     'fuk',
     'fuq',
@@ -144,13 +164,27 @@ function checkIfSwear(word) {
     'dck',
     'psy',
     'fag',
+    'fâg',
+    'fåg',
+    'fàg',
+    'fäg',
     'fgt',
     'ngr',
     'nig',
+    'n!g',  
+    'n¡g',
     'cum',
+    'cùm',
+    'cûm',
     'jiz',
+    'j!z',
+    'j¡z',
     'jzz',
     'gay',
+    'gây',
+    'gåy',
+    'gày',
+    'gäy',
     'gey',
     'gei',
     'gai',
@@ -160,6 +194,10 @@ function checkIfSwear(word) {
     'joo',
     'slt',
     'jap',
+    'jâp',
+    'jåp',
+    'jàp',
+    'jäp',
     'kkk'
   ];
 
@@ -173,12 +211,15 @@ function checkIfSwear(word) {
 }
 
 function saveNameToFireBase(newId, finalScore) {
-  var savedName = document.querySelector('input').value;
+  var savedName = document.querySelector('input').value.toLowerCase();
   if(checkIfSwear(savedName)) {
     savedName = '___';
   }
   if(savedName.length > 3) {
     savedName = '---';
+  }
+  if(savedName === undefined) {
+    savedName = '!!!';
   }
   var score = finalScore;
 
