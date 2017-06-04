@@ -88,8 +88,7 @@ function saveToFireBase(score) {
       });  
     });
     checkTopTen.forEach(function(element) {
-      console.log(newId, element.key);
-      console.log(newId === element.key);
+
       if (element.key === newId) {
   
         this.input = game.add.inputField((game.world.bounds.width/2) - 28, game.world.bounds.height - 250, {
