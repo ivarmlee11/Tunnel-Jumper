@@ -16,7 +16,7 @@ titleState.prototype.create = function() {
   this.playLabel.inputEnabled = true;
   this.playLabel.events.onInputUp.add(startGame);
 
-  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 39, game.world.bounds.height - 40, "INSTRUCTIONS", {
+  this.instructionsLabel = game.add.text((game.world.bounds.width/2) - 34, game.world.bounds.height - 40, "INSTRUCTIONS", {
     font: '12px Space Mono', fill: '#ffffff'
   });
 
@@ -36,17 +36,17 @@ function startGame() {
 function toggleInstructions() {
   if(!this.instructionsShowing) {
     this.instructionsShowing = true;
-    this.controlImage = game.add.image(88, 90, 'controls');
-    this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
-    this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
-    this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
-    this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
-    this.arrowInts1 = game.add.text(163, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
-    this.arrowInts2 = game.add.text(182, 320, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
-    this.arrowInts3 = game.add.text(210, 301, '^', {font: '25px Space Mono', fill: '#000000'});
-    this.arrowInts4 = game.add.text(211, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
-    this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
-    this.arrowInts6 = game.add.text(260, 279, '►', {font: '10px Space Mono', fill: '#000000'});
+    this.controlImage = game.add.image(131, 90, 'controls');
+    this.shiftInts1 = game.add.text(178, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
+    this.shiftInts2 = game.add.text(248, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
+    this.spaceInts1 = game.add.text(178, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
+    this.spaceInts2 = game.add.text(248, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts1 = game.add.text(206, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts2 = game.add.text(225, 320, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts3 = game.add.text(253, 301, '^', {font: '25px Space Mono', fill: '#000000'});
+    this.arrowInts4 = game.add.text(254, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
+    this.arrowInts5 = game.add.text(208, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
+    this.arrowInts6 = game.add.text(303, 279, '►', {font: '10px Space Mono', fill: '#000000'});
   } else {
     this.instructionsShowing = false;
     this.shiftInts1.destroy();

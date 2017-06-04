@@ -22,19 +22,22 @@ var playState = function () {
 
   this.levels = {
     1: {
-      1: "big_ice",
-      2: "small_ice",
-      3: "med_ice"
+      1: 'big_ice',
+      2: 'small_ice',
+      3: 'med_ice',
+      4: 'huge_ice'
     },
     2: {
-      1: "big_ice",
-      2: "small_ice",
-      3: "small_ice"
+      1: 'big_ice',
+      2: 'small_ice',
+      3: 'small_ice',
+      4: 'huge_ice'
     },
     3: {
-      1: "big_ice",
-      2: "small_ice",
-      3: "small_ice"
+      1: 'big_ice',
+      2: 'small_ice',
+      3: 'small_ice',
+      4: 'med_ice'
     }
   };
 
@@ -54,7 +57,7 @@ playState.prototype.create = function() {
   game.paused = false;
 
   // map settings
-  game.add.tileSprite(-150, -100, 1000, 1000, 'background');
+  game.add.tileSprite(-500, -310, 2000, 2000, 'background');
 
   // world bounds
   game.world.setBounds(0, 0, game.world.bounds.width, game.world.bounds.height + 100);
@@ -82,11 +85,11 @@ playState.prototype.create = function() {
   game.add.existing(this.player);
 
   // add ground so the player doesn't bouce around on the world border on game start
-  this.ground = game.add.sprite(0, game.world.bounds.height - 100, 'ground'); 
+  this.ground = game.add.sprite(100, game.world.bounds.height - 10, 'ground'); 
   game.physics.p2.enable(this.ground);
   this.ground.body.static = true;
 
-  game.time.events.add(Phaser.Timer.SECOND * 15, moveGround.bind(this));
+  game.time.events.add(Phaser.Timer.SECOND * 25, moveGround.bind(this));
 
   // collision groups
   this.movingPlatforms = game.add.group();
@@ -128,8 +131,8 @@ playState.prototype.create = function() {
   this.pauseLabel = game.add.text(20,  game.world.bounds.height - 135, 'PAUSE', {font: '12px Space Mono', fill: '#ffffff'});
 
   // combo indicator
-  this.comboIndicator = game.add.text(250,  game.world.bounds.height - 135, 'COMBO', {font: '12px Space Mono', fill: '#ffffff'});
-  this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
+  this.comboIndicator = game.add.text(350,  game.world.bounds.height - 135, 'COMBO', {font: '12px Space Mono', fill: '#ffffff'});
+  this.comboIndicator = game.add.image(400,  game.world.bounds.height - 145, 'charge0');
 
   this.pauseLabel.inputEnabled = true;
   this.pauseLabel.events.onInputUp.add(function () {
@@ -137,17 +140,17 @@ playState.prototype.create = function() {
     game.paused = !game.paused;
     if(game.paused) {
       this.pauseLabel.setText('UNPAUSE');
-      this.controlImage = game.add.image(88, 90, 'controls');
-      this.shiftInts1 = game.add.text(135, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
-      this.shiftInts2 = game.add.text(205, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
-      this.spaceInts1 = game.add.text(135, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
-      this.spaceInts2 = game.add.text(205, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
-      this.arrowInts1 = game.add.text(163, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
-      this.arrowInts2 = game.add.text(182, 315, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
-      this.arrowInts3 = game.add.text(210, 301, '^', {font: '25px Space Mono', fill: '#000000'});
-      this.arrowInts4 = game.add.text(211, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
-      this.arrowInts5 = game.add.text(165, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
-      this.arrowInts6 = game.add.text(260, 279, '►', {font: '10px Space Mono', fill: '#000000'});
+      this.controlImage = game.add.image(131, 90, 'controls');
+      this.shiftInts1 = game.add.text(178, 128, 'SHIFT', {font: '12px Space Mono', fill: '#000000'});
+      this.shiftInts2 = game.add.text(248, 128, 'RUN', {font: '12px Space Mono', fill: '#000000'});
+      this.spaceInts1 = game.add.text(178, 172, 'SPACE', {font: '12px Space Mono', fill: '#000000'});
+      this.spaceInts2 = game.add.text(248, 172, 'JUMP', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts1 = game.add.text(206, 250, 'LEFT              RIGHT', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts2 = game.add.text(225, 315, 'SLOW DOWN', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts3 = game.add.text(253, 301, '^', {font: '25px Space Mono', fill: '#000000'});
+      this.arrowInts4 = game.add.text(254, 290, '▼', {font: '10px Space Mono', fill: '#000000'});
+      this.arrowInts5 = game.add.text(208, 278, '◄', {font: '12px Space Mono', fill: '#000000'});
+      this.arrowInts6 = game.add.text(303, 279, '►', {font: '10px Space Mono', fill: '#000000'});
     } else {
       this.pauseLabel.setText('PAUSE');
       this.shiftInts1.destroy();
@@ -167,8 +170,7 @@ playState.prototype.create = function() {
 };
 
 playState.prototype.calcPoints = function() {
-  var allPoints = this.updateCycle + this.comboPoints;
-  this.totalPoints = allPoints;
+  this.totalPoints = this.updateCycle + this.comboPoints;
 };
 
 playState.prototype.update = function() {
@@ -182,7 +184,7 @@ playState.prototype.update = function() {
   this.timeOnGround += 0.01;
 
   if((this.jumpNumber > 0) && (this.timeOnGround > 1) && (playerOnGround.call(this, this.yAxis))) {
-    this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
+    this.comboIndicator = game.add.image(300,  game.world.bounds.height - 5, 'charge0');
   }
 
   if(this.updateCycle == 1) {
@@ -192,13 +194,13 @@ playState.prototype.update = function() {
 
   var cyc = this.updateCycle;
 
-  if ((cyc < 3000) && (cyc % 90 === 0)) {
+  if ((cyc < 3000) && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 1);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 1);
-  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 90 === 0)) {
+  } else if ((cyc < 6000) && (cyc >= 3000) && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 2);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 2);
-  } else if ((cyc >= 6000)  && (cyc % 90 === 0)) {
+  } else if ((cyc >= 6000)  && (cyc % 60 === 0)) {
     makePlatforms.call(this, this.player, this.movingPlatforms, 3);
     // makePlatforms.call(this, this.player, this.movingPlatforms, 3);
   }
@@ -267,24 +269,24 @@ playState.prototype.update = function() {
         this.xSpeed = 125;
         this.player.body.fixedRotation = true;
         this.comboIndicator.destroy();
-        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge0');
+        this.comboIndicator = game.add.image(400,  game.world.bounds.height - 145, 'charge0');
         break;
       case 1:
         this.ySpeed = 550;   
         this.comboIndicator.destroy();
-        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge1');
+        this.comboIndicator = game.add.image(400,  game.world.bounds.height - 145, 'charge1');
         break;
       case 2:
         this.ySpeed = 575;
         this.comboIndicator.destroy();
-        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge2');
+        this.comboIndicator = game.add.image(400,  game.world.bounds.height - 145, 'charge2');
         break;
       default:
         this.ySpeed = 600;
         this.xSpeed = 300;
         game.physics.p2.gravity.y = 1050;
         this.comboIndicator.destroy();
-        this.comboIndicator = game.add.image(300,  game.world.bounds.height - 145, 'charge3');
+        this.comboIndicator = game.add.image(400,  game.world.bounds.height - 145, 'charge3');
         this.wallSpriteContactMaterial.restitution = 0.65;
     }
     this.player.body.moveUp(this.ySpeed);
@@ -343,9 +345,8 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
   } else if (randomXAxis > 320) {
     randomXAxis -= 100;
   }
-  // console.log(randomXAxis);
 
-  var randomLevelSegmentChoice = Math.floor(((Math.random() * 3) + 1));
+  var randomLevelSegmentChoice = Math.floor(((Math.random() * 4) + 1));
 
   // console.log(randomLevelSegmentChoice, ' randomLevelSegmentChoice');
 
@@ -353,8 +354,9 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   // console.log(levelChoice, ' level choice');
 
-  var platform = platformGroup.create(randomXAxis, -170, levelChoice);
 
+  var platform = platformGroup.create(randomXAxis, -170, levelChoice);
+  
   platform.name = 'platform';                      
   game.physics.p2.enable(platform, true);                     
   platform.body.kinematic = true;                          
@@ -365,7 +367,7 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 }
 
 function movePlatforms(platform) {
-  platform.body.velocity.y += 0.074;
+  platform.body.velocity.y += 0.079;
 
   if (platform.body.y > game.world.bounds.height + 20) {
     platform.destroy();

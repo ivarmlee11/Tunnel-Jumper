@@ -11,7 +11,7 @@ gameOverState.prototype.create = function() {
 
   this.finalScoreToFireBase = game.state.states.gameover.states;
 
-  this.displayScore = game.add.text((game.world.bounds.width/2) - 150, game.world.bounds.height - 400, this.finalScoreToFireBase, {font: '34px Space Mono', fill: '#ffffff'});
+  this.displayScore = game.add.text((game.world.bounds.width/2) - 150, game.world.bounds.height - 550, this.finalScoreToFireBase, {font: '34px Space Mono', fill: '#ffffff'});
   this.displayScore.anchor.set(0.5);
   this.restartGame = game.add.text((game.world.bounds.width/2) - 13, game.world.bounds.height - 200 , 'RESTART', {font: '12px Space Mono', fill: '#ffffff'});
 
@@ -29,8 +29,8 @@ gameOverState.prototype.displayTopTen = function(newId) {
   var listNumber = 1;
   var listSpacing = 15;
 
-  game.add.image((game.world.bounds.width/2) - 39, (game.world.bounds.height/2) - 200, 'topScoreBackground');
-  game.add.text((game.world.bounds.width/2) - 4, (game.world.bounds.height/2) - 198, 'TOP TEN', {font: '12px Space Mono', fill: '#000000'});
+  game.add.image((game.world.bounds.width/2) - 49, (game.world.bounds.height/2) - 200, 'topScoreBackground');
+  game.add.text((game.world.bounds.width/2) - 14, (game.world.bounds.height/2) - 198, 'TOP TEN', {font: '12px Space Mono', fill: '#000000'});
 
   var namesAndScores = [];
 
@@ -50,9 +50,9 @@ gameOverState.prototype.displayTopTen = function(newId) {
       console.log('writing to top ten list');
       var listString = listNumber + ' ' + element.name + ' ' + element.score;
       if(newId && (newId === element.key)) {
-        game.add.text((game.world.bounds.width/2) - 40, ((game.world.bounds.height/2) - 188) + listSpacing, '►', {font: '14px Space Mono', fill: '#000000'});
+        game.add.text((game.world.bounds.width/2) - 50, ((game.world.bounds.height/2) - 188) + listSpacing, '►', {font: '14px Space Mono', fill: '#000000'});
       }
-      game.add.text((game.world.bounds.width/2) - 11, ((game.world.bounds.height/2) - 190) + listSpacing, listString, {font: '12px Space Mono', fill: '#000000'});
+      game.add.text((game.world.bounds.width/2) - 21, ((game.world.bounds.height/2) - 190) + listSpacing, listString, {font: '12px Space Mono', fill: '#000000'});
 
       listNumber += 1;
       listSpacing += 15;
@@ -75,7 +75,7 @@ function saveToFireBase(score) {
 
   var checkTopTen = [];
   
-  fireBase.orderByChild('score').limitToLast(11).once('value', function(snapshot) {
+  fireBase.orderByChild('score').limitToLast(10).once('value', function(snapshot) {
     var snap = snapshot;
     snap.forEach(function(childSnapshot) {
       var childKey = childSnapshot.key;
@@ -88,7 +88,8 @@ function saveToFireBase(score) {
       });  
     });
     checkTopTen.forEach(function(element) {
-      // console.log(newId, element.key);
+      console.log(newId, element.key);
+      console.log(newId === element.key);
       if (element.key === newId) {
   
         this.input = game.add.inputField((game.world.bounds.width/2) - 28, game.world.bounds.height - 250, {
@@ -159,6 +160,8 @@ function checkIfSwear(word) {
     'kok',
     'dic',
     'dik',
+    'd!k',
+    'd¡k',
     'diq',
     'dix',
     'dck',
