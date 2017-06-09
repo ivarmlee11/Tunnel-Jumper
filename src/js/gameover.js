@@ -47,7 +47,7 @@ gameOverState.prototype.displayTopTen = function(newId) {
 
     }); 
     namesAndScores.reverse().forEach(function(element) {
-      console.log('writing to top ten list');
+
       var listString = listNumber + ' ' + element.name + ' ' + element.score;
       if(newId && (newId === element.key)) {
         game.add.text((game.world.bounds.width/2) - 50, ((game.world.bounds.height/2) - 188) + listSpacing, '►', {font: '14px Space Mono', fill: '#000000'});
@@ -77,6 +77,7 @@ function saveToFireBase(score) {
   
   fireBase.orderByChild('score').limitToLast(10).once('value', function(snapshot) {
     var snap = snapshot;
+
     snap.forEach(function(childSnapshot) {
       var childKey = childSnapshot.key;
       var childName = childSnapshot.val().name;
@@ -87,6 +88,7 @@ function saveToFireBase(score) {
         name: childName
       });  
     });
+
     checkTopTen.forEach(function(element) {
 
       if (element.key === newId) {
@@ -114,7 +116,9 @@ function saveToFireBase(score) {
 
       }
     });
+
     gameOverState.prototype.displayTopTen(newId);
+
   });
 
 }
@@ -175,12 +179,14 @@ function checkIfSwear(word) {
     'nig',
     'n!g',  
     'n¡g',
+    'n|g',
     'cum',
     'cùm',
     'cûm',
     'jiz',
     'j!z',
     'j¡z',
+    'j|z',
     'jzz',
     'gay',
     'gây',

@@ -354,7 +354,6 @@ function makePlatforms(player, platformGroup, stage, numberOfPlatforms) {
 
   // console.log(levelChoice, ' level choice');
 
-
   var platform = platformGroup.create(randomXAxis, -170, levelChoice);
   
   platform.name = 'platform';                      
